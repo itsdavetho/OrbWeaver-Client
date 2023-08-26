@@ -78,8 +78,9 @@ public class PropHuntPackets {
         return packetList;
     }
 
-    public void sendPacket(byte[] buffer) {
+    public void sendPacket(List<byte[]> packet) {
         try {
+            byte[] buffer = concatenateByteArrays(packet);
             DatagramPacket datagramPacket = new DatagramPacket(buffer, buffer.length, plugin.getServerAddress(), plugin.getServerPort());
             plugin.getSocket().send(datagramPacket);
         } catch (IOException e) {

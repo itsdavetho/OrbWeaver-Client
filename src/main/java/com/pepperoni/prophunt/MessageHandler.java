@@ -43,9 +43,10 @@ public class MessageHandler {
             Utf8Serializer.Utf8SerializedData utf8Data = Utf8Serializer.serialize(data, size, offset);
             offset = utf8Data.offset;
             plugin.setJWT(utf8Data.data[0]);
-            plugin.createGroup(plugin.getJWT());
+            //plugin.createGroup(plugin.getJWT());
+            plugin.setLoggedIn(true);
         } else if (action == PacketType.ERROR_MESSAGE.getIndex()) {
-           // int dataValue = ByteBuffer.wrap(data, offset + 1, 2).getShort();
+            // int dataValue = ByteBuffer.wrap(data, offset + 1, 2).getShort();
             //  if (Errors.Errors[dataValue] != null) {
             System.out.println("ERROR RECV: "/* + Errors.Errors[dataValue]*/);
             // }
@@ -71,13 +72,20 @@ public class MessageHandler {
         } else if (action == PacketType.GROUP_INFO.getIndex()) {
             int creatorUsernameLength = message.getData()[offset];
             offset++;
+            int groupIdLength = message.getData()[offset];
+            offset++;
 
             byte[] creatorUsernameBuffer = new byte[creatorUsernameLength];
             System.arraycopy(message.getData(), offset, creatorUsernameBuffer, 0, creatorUsernameLength);
             String creatorUsername = new String(creatorUsernameBuffer, StandardCharsets.UTF_8);
             offset += creatorUsernameLength;
 
-            System.out.println("Received group info (creator: " + creatorUsername + ")");
+            byte[] groupIdBuffer = new byte[groupIdLength];
+            System.arraycopy(message.getData(), offset, creatorUsernameBuffer, 0, creatorUsernameLength);
+            String groupId = new String(groupIdBuffer, StandardCharsets.UTF_8);
+            offset += groupIdLength;
+            System.out.println("Received group info (creator: " + creatorUsername + ", GID: " + groupId + ")");
+            plugin.setGroupId(groupId);
         } else {
             System.out.println("Unknown MSG recv: " + ByteBuffer.wrap(data) + " action " + action);
         }

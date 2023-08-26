@@ -34,10 +34,10 @@ public class PropHuntTwoOverlay extends Overlay {
                 .text(overlayTitle)
                 .color(Color.GREEN)
                 .build());
-
+        String serverText = "Server: " + plugin.getServerAddress() + ":" + plugin.getServerPort();
         // Set the size of the overlay (width)
         panelComponent.setPreferredSize(new Dimension(
-                graphics.getFontMetrics().stringWidth(overlayTitle) + 30,
+                graphics.getFontMetrics().stringWidth(serverText) + 50,
                 0));
 
         // Add a line on the overlay for world number
