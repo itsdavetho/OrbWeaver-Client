@@ -1,118 +1,217 @@
 package com.pepperoni.prophunt;
 
 import com.google.inject.Provides;
-import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
+import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.GameStateChanged;
+import net.runelite.api.events.GameTick;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.client.ui.ClientToolbar;
+import net.runelite.client.ui.NavigationButton;
+import net.runelite.client.ui.overlay.OverlayManager;
+import net.runelite.client.util.ImageUtil;
 
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
+import javax.inject.Inject;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.net.*;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
 @PluginDescriptor(
-	name = "Prop Hunt Two"
+        name = "Prop Hunt Two"
 )
-public class PropHuntTwoPlugin extends Plugin
-{
-	@Inject
-	private Client client;
+public class PropHuntTwoPlugin extends Plugin {
+    @Inject
+    private Client client;
 
-	@Inject
-	private PropHuntTwoConfig config;
+    @Inject
+    private PropHuntTwoConfig config;
 
-	@Override
-	protected void startUp() throws Exception
-	{
-		log.info("Prop Hunt Two started!");
-	}
+    @Inject
+    private OverlayManager overlayManager;
 
-	@Override
-	protected void shutDown() throws Exception
-	{
-		log.info("Prop Hunt Two stopped!");
-	}
+    @Inject
+    private PropHuntTwoOverlay overlay;
 
-	@Subscribe
-	public void onGameStateChanged(GameStateChanged gameStateChanged)
-	{
-		if (gameStateChanged.getGameState() == GameState.LOGGED_IN)
-		{
-			DatagramSocket clientSocket;
-			try {
-				clientSocket = new DatagramSocket();
-				InetAddress serverAddress = InetAddress.getByName("127.0.0.1");
-				int serverPort = 4200;
+    @Inject
+    private ClientToolbar clientToolbar;
 
-				int clientPort = serverPort + 1;
+    private PropHuntTwoPanel panel;
+    private NavigationButton navButton;
 
-				List<byte[]> packet = createPacket(PacketType.USER_LOGIN, "unauthorized");
-				byte[] username = "test".getBytes("UTF-8");
-				byte[] password = "password".getBytes("UTF-8");
-				byte[] worldBuffer = new byte[2];
-				ByteBuffer.wrap(worldBuffer).putShort((short) 301);
+    private DatagramSocket socket;
+    private final PropHuntPackets packets;
+    private final MessageHandler messageHandler;
 
-				List<byte[]> bufferList = new ArrayList<>();
-				bufferList.add(new byte[]{(byte) username.length, (byte) password.length});
-				bufferList.add(username);
-				bufferList.add(password);
-				bufferList.add(worldBuffer);
+    private InetAddress serverAddress;
+    private int serverPort;
+    private int clientPort;
+    private String playerName = null;
 
-				packet.addAll(bufferList);
+    private WorldPoint lastLocation;
 
-				byte[] buffer = concatenateByteArrays(packet);
-				DatagramPacket datagramPacket = new DatagramPacket(buffer, buffer.length, serverAddress, serverPort);
+    public PropHuntTwoPlugin() {
+        this.packets = new PropHuntPackets(this);
+        this.messageHandler = new MessageHandler(this);
+    }
 
-				clientSocket.send(datagramPacket);
+    @Override
+    protected void startUp() throws Exception {
+        overlayManager.add(overlay);
+        panel = new PropHuntTwoPanel(this);
+        final BufferedImage icon = ImageUtil.loadImageResource(getClass(), "panel_icon.png");
+        navButton = NavigationButton.builder()
+                .tooltip("Prop Hunt")
+                .priority(5)
+                .icon(icon)
+                .panel(panel)
+                .build();
+        clientToolbar.addNavigation(navButton);
+        log.info("Prop Hunt Two started!");
+    }
 
-				clientSocket.close();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-	}
-	private static List<byte[]> createPacket(PacketType packet, String token) {
-		List<byte[]> packetList = new ArrayList<>();
+    @Override
+    protected void shutDown() throws Exception {
+        socket.close();
+        log.info("Prop Hunt Two stopped!");
+    }
 
-		byte[] actionBuffer = new byte[1];
-		actionBuffer[0] = (byte) packet.getIndex();
+    @Subscribe
+    public void onGameTick(GameTick tick) {
+        if (client.getLocalPlayer() != null) {
+            if (lastLocation != client.getLocalPlayer().getWorldLocation()) {
+                // player moved, send location packet update
+                lastLocation = client.getLocalPlayer().getWorldLocation();
+            }
+        }
+    }
 
-		byte[] jwtBuffer = token.getBytes();
+    @Subscribe
+    public void onGameStateChanged(GameStateChanged event) {
+        if (event.getGameState() == GameState.LOGGED_IN) {
+            if (client.getLocalPlayer() != null && playerName == null) {
+                playerName = client.getLocalPlayer().getName();
+                configureServer();
+                try {
+                    login();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+    private void startMessageHandlerThread() {
+        Thread messageHandlerThread = new Thread(this::handleIncomingMessages);
+        messageHandlerThread.start();
+    }
 
-		byte[] tokenSize = new byte[1];
-		tokenSize[0] = (byte) jwtBuffer.length;
+    private void handleIncomingMessages() {
+        byte[] buffer = new byte[512]; // Adjust buffer size as needed
 
-		packetList.add(actionBuffer);
-		packetList.add(tokenSize);
-		packetList.add(jwtBuffer);
+        while (!Thread.interrupted()) {
+            DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+            try {
+                socket.receive(packet); // This call blocks until a packet is received
+                messageHandler.handleMessage(packet);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    private void configureServer() {
+        try {
+            socket = new DatagramSocket();
+            String[] server = config.server().split(":");
+            if (server.length > 0) {
+                String hostname = server[0];
+                if (server.length < 2) {
+                    serverPort = 4200;
+                } else {
+                    try {
+                        serverPort = Integer.parseInt(server[1]);
+                    } catch (NumberFormatException e) {
+                        System.out.println("invalid port, trying default port (4200)");
+                        serverPort = 4200;
+                    }
+                }
 
-		return packetList;
-	}
+                try {
+                    serverAddress = InetAddress.getByName(hostname);
+                    if (serverAddress instanceof Inet4Address) {
+                        String serverString = serverAddress.getHostName() + ":" + serverPort;
+                        client.addChatMessage(ChatMessageType.PRIVATECHAT, "Prop Hunt", "Connecting (" + serverString + ")...", "Prop Hunt");
+                        startMessageHandlerThread();
+                    } else {
+                        System.out.println("Invalid IPv6 Address.");
+                    }
+                } catch (UnknownHostException e) {
+                    System.out.println("Invalid IP Address.");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
-	private static byte[] concatenateByteArrays(List<byte[]> arrays) {
-		int totalLength = arrays.stream().mapToInt(array -> array.length).sum();
-		byte[] result = new byte[totalLength];
+    private void login() throws IOException {
+        int world = client.getWorld();
+        System.out.println(playerName);
 
-		int currentIndex = 0;
-		for (byte[] array : arrays) {
-			System.arraycopy(array, 0, result, currentIndex, array.length);
-			currentIndex += array.length;
-		}
+        List<byte[]> packet = packets.createPacket(PacketType.USER_LOGIN, "unauthorized");
+        byte[] username = playerName.getBytes(StandardCharsets.UTF_8);
+        byte[] password = config.password().getBytes(StandardCharsets.UTF_8);
+        byte[] worldBuffer = new byte[2];
+        ByteBuffer.wrap(worldBuffer).putShort((short) world);
 
-		return result;
-	}
-	@Provides
-	PropHuntTwoConfig provideConfig(ConfigManager configManager)
-	{
-		return configManager.getConfig(PropHuntTwoConfig.class);
-	}
+        List<byte[]> bufferList = new ArrayList<>();
+        bufferList.add(new byte[]{(byte) username.length, (byte) password.length});
+        bufferList.add(username);
+        bufferList.add(password);
+        bufferList.add(worldBuffer);
+
+        packet.addAll(bufferList);
+
+        byte[] buffer = packets.concatenateByteArrays(packet);
+        DatagramPacket datagramPacket = new DatagramPacket(buffer, buffer.length, serverAddress, serverPort);
+
+        socket.send(datagramPacket);
+    }
+
+    public void createGroup(String jwt) {
+        List<byte[]> packet = getPacketHandler().createPacket(PacketType.GROUP_NEW, jwt);
+        byte[] buffer = getPacketHandler().concatenateByteArrays(packet);
+        getPacketHandler().sendPacket(buffer);
+        System.out.println("createGroup called");
+    }
+
+    public DatagramSocket getSocket() {
+        return socket;
+    }
+
+    public PropHuntPackets getPacketHandler() {
+        return this.packets;
+    }
+
+    public InetAddress getServerAddress() {
+        return serverAddress;
+    }
+
+    public int getServerPort() {
+        return serverPort;
+    }
+
+    @Provides
+    PropHuntTwoConfig provideConfig(ConfigManager configManager) {
+        return configManager.getConfig(PropHuntTwoConfig.class);
+    }
 }
