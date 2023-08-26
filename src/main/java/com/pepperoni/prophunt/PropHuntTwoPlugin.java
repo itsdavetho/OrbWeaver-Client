@@ -1,11 +1,11 @@
 package com.pepperoni.prophunt;
 
+import com.google.inject.Inject;
 import com.google.inject.Provides;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
-import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
@@ -20,28 +20,22 @@ import net.runelite.client.ui.NavigationButton;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.ImageUtil;
 
-import javax.inject.Inject;
 import javax.swing.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.*;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
 
 @Slf4j
 @PluginDescriptor(
         name = "Prop Hunt Two"
 )
 public class PropHuntTwoPlugin extends Plugin {
-    @Inject
-    private PropHuntPackets packets;
-    @Inject
-    private PropHuntUser user;
-    @Inject
-    private MessageHandler messageHandler;
+
+    private final PropHuntPackets packets;
+
+    private final PropHuntUser user;
+
+    private final MessageHandler messageHandler;
     @Inject
     private Client client;
 
@@ -64,12 +58,13 @@ public class PropHuntTwoPlugin extends Plugin {
     private DatagramSocket socket;
     private InetAddress serverAddress;
     private int serverPort;
-    private int clientPort;
+    //private int clientPort;
 
     public PropHuntTwoPlugin() {
-
+        packets = new PropHuntPackets(this);
+        user = new PropHuntUser(this, client);
+        messageHandler = new MessageHandler(this);
     }
-
     @Override
     protected void startUp() {
         commandManager.registerCommandAsync("!panel", this::reloadPanel);
@@ -91,7 +86,7 @@ public class PropHuntTwoPlugin extends Plugin {
         user.setJWT(null);
         user.setGroupId(null);
         user.setLoggedIn(false);
-       // socket.close();
+        // socket.close();
         log.info("Prop Hunt Two stopped!");
     }
 

@@ -1,11 +1,10 @@
 package com.pepperoni.prophunt;
 
 
+import com.google.inject.Inject;
 import net.runelite.api.Client;
 import net.runelite.api.coords.WorldPoint;
-import net.runelite.client.plugins.Plugin;
 
-import javax.inject.Inject;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
@@ -23,8 +22,7 @@ public class PropHuntUser {
     private String groupId = null;
     private boolean loggedIn = false;
 
-    @Inject
-    private PropHuntUser(PropHuntTwoPlugin plugin, Client client) {
+    public PropHuntUser(PropHuntTwoPlugin plugin, Client client) {
         this.plugin = plugin;
         this.client = client;
     }
@@ -129,10 +127,6 @@ public class PropHuntUser {
         return "inactive";
     }
 
-    public void setUsername(String username) {
-        this.playerName = username;
-    }
-
     public void setLocation(WorldPoint loc) {
         this.lastLocation = loc;
     }
@@ -143,5 +137,9 @@ public class PropHuntUser {
 
     public String getUsername() {
         return this.playerName;
+    }
+
+    public void setUsername(String username) {
+        this.playerName = username;
     }
 }

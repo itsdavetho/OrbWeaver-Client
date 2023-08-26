@@ -142,7 +142,7 @@ public class PropHuntTwoPanel extends PluginPanel implements ActionListener {
     }
 
     public void setGroupTextField(String groupId) {
-        if(groupId == null) {
+        if (groupId == null) {
             groupId = "";
         }
         textFieldJoinParty.setText(groupId);
