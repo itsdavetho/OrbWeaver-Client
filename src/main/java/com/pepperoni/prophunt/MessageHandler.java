@@ -81,11 +81,13 @@ public class MessageHandler {
             offset += creatorUsernameLength;
 
             byte[] groupIdBuffer = new byte[groupIdLength];
-            System.arraycopy(message.getData(), offset, creatorUsernameBuffer, 0, creatorUsernameLength);
+            System.arraycopy(message.getData(), offset, groupIdBuffer, 0, groupIdLength);
             String groupId = new String(groupIdBuffer, StandardCharsets.UTF_8);
             offset += groupIdLength;
             System.out.println("Received group info (creator: " + creatorUsername + ", GID: " + groupId + ")");
             plugin.setGroupId(groupId);
+        } else if (action == PacketType.GROUP_LEAVE.getIndex()) {
+            plugin.setGroupId(null);
         } else {
             System.out.println("Unknown MSG recv: " + ByteBuffer.wrap(data) + " action " + action);
         }

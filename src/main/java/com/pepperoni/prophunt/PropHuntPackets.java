@@ -9,39 +9,38 @@ import java.util.List;
 import java.util.Map;
 
 enum PacketType {
-    USER_LOGIN(0),
-    USER_GET_JWT(1),
-    USER_LOGOUT(2),
+    USER_LOGIN,
+    USER_GET_JWT,
+    USER_LOGOUT,
 
-    GROUP_NEW(3),
-    GROUP_JOIN(4),
-    GROUP_USERS(5),
-    GROUP_INFO(6),
-    GROUP_START_GAME(7),
-    GROUP_END_GAME(8),
-    GROUP_SET_STAGE(9),
-    GROUP_NOTIFY(10),
+    GROUP_NEW,
+    GROUP_JOIN,
+    GROUP_LEAVE,
+    GROUP_USERS,
+    GROUP_INFO,
+    GROUP_START_GAME,
+    GROUP_END_GAME,
+    GROUP_SET_STAGE,
+    GROUP_NOTIFY,
 
-    PLAYER_PROP(11),
-    PLAYER_LOCATION(12),
-    PLAYER_ORIENTATION(13),
-    PLAYER_NOTIFY(14),
+    PLAYER_PROP,
+    PLAYER_LOCATION,
+    PLAYER_ORIENTATION,
+    PLAYER_NOTIFY,
 
-    ERROR_MESSAGE(15);
+    ERROR_MESSAGE;
 
     private static final Map<Integer, PacketType> indexToEnumMap = new HashMap<>();
 
     static {
+        int index = 0;
         for (PacketType packetType : PacketType.values()) {
+            packetType.index = index++;
             indexToEnumMap.put(packetType.index, packetType);
         }
     }
 
-    private final int index;
-
-    PacketType(int index) {
-        this.index = index;
-    }
+    private int index;
 
     public static PacketType fromIndex(int index) {
         return indexToEnumMap.get(index);

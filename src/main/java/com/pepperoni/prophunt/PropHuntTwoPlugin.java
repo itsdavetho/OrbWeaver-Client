@@ -228,7 +228,7 @@ public class PropHuntTwoPlugin extends Plugin {
     }
 
     public void logout() {
-        if(getLoggedIn() && token != null && socket != null) {
+        if (getLoggedIn() && token != null && socket != null) {
             List<byte[]> packet = packets.createPacket(PacketType.USER_LOGOUT, token);
             packets.sendPacket(packet);
         }
@@ -247,6 +247,7 @@ public class PropHuntTwoPlugin extends Plugin {
         List<byte[]> packet = getPacketHandler().createPacket(PacketType.GROUP_NEW, jwt);
         getPacketHandler().sendPacket(packet);
     }
+
     public String getGroupId() {
         return groupId;
     }
@@ -258,7 +259,7 @@ public class PropHuntTwoPlugin extends Plugin {
     }
 
     public void joinGroup(String groupId) throws UnsupportedEncodingException {
-        if(getLoggedIn() && getJWT() != null && getGroupId() == null) {
+        if (getLoggedIn() && getJWT() != null && getGroupId() == null) {
             List<byte[]> packet = getPacketHandler().createPacket(PacketType.GROUP_JOIN, getJWT());
             byte[] groupBuffer = groupId.getBytes(StandardCharsets.UTF_8);
             List<byte[]> bufferList = new ArrayList<>();

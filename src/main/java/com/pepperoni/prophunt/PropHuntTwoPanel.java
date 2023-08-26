@@ -16,19 +16,10 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
 public class PropHuntTwoPanel extends PluginPanel implements ActionListener {
-    private static final String CREATE_BUTTON_TEXT = "Create party";
-    private static final String JOIN_PARTY_TEXT = "Join party";
-    private static final String CREATE_PARTY_SUCCESS = "Created a new party.";
-    private static final String JOIN_PARTY_SUCCESS = "Joined the party.";
-    private static final String EMPTY_PARTY_ID = "You have to enter a party id.";
-    private static final String INVALID_PARTY_ID = "You entered an invalid party id.";
-    private static final String COPY_SUCCESS = "Copied the party id to your clipboard.";
-    private static final String NO_PARTY_JOINED = "No party joined.";
     private final PropHuntTwoPlugin plugin;
-    private final JLabel currentPartyLabel = new JLabel(NO_PARTY_JOINED, SwingConstants.CENTER);
+    private final JLabel currentPartyLabel = new JLabel("Not in a group", SwingConstants.CENTER);
     private final JLabel messageLabel = new JLabel();
     private final JLabel copySuccessLabel = new JLabel();
-
     private final JTextField textFieldJoinParty = new JTextField();
     private final JButton leaveJoinGroupButton = new JButton("Join Group");
     private final JButton loginLogout = new JButton("Login");
@@ -151,6 +142,9 @@ public class PropHuntTwoPanel extends PluginPanel implements ActionListener {
     }
 
     public void setGroupTextField(String groupId) {
+        if(groupId == null) {
+            groupId = "";
+        }
         textFieldJoinParty.setText(groupId);
     }
 
@@ -163,7 +157,7 @@ public class PropHuntTwoPanel extends PluginPanel implements ActionListener {
     }
 
     public void updateLeaveJoinGroupButton() {
-        if(plugin.getGroupId() != null) {
+        if (plugin.getGroupId() != null) {
             this.leaveJoinGroupButton.setText("Leave Group");
         } else {
             this.leaveJoinGroupButton.setText("Join Group");
