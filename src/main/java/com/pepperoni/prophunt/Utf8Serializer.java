@@ -6,29 +6,32 @@ import java.util.List;
 
 public class Utf8Serializer {
     public static Utf8SerializedData serialize(byte[] message, int size, int offset) {
-        List<Byte> sizeBuffer = new ArrayList<>();
+        Utf8SerializedData result = new Utf8SerializedData();
+        List<String> dataList = new ArrayList<>();
+
+        List<Integer> sizeList = new ArrayList<>();
         for (int i = 0; i < size; i++) {
-            sizeBuffer.add(message[offset]);
-            offset += 1;
+            sizeList.add(message[offset] & 0xFF);
+            offset++;
         }
 
-        List<String> data = new ArrayList<>();
-        for (Byte length : sizeBuffer) {
+        for (int length : sizeList) {
+            if (length <= 0) {
+                continue;
+            }
+
             String utf8String = new String(message, offset, length, StandardCharsets.UTF_8);
-            data.add(utf8String);
+            dataList.add(utf8String);
             offset += length;
         }
 
-        return new Utf8SerializedData(data.toArray(new String[0]), offset);
+        result.data = dataList.toArray(new String[0]);
+        result.offset = offset;
+        return result;
     }
 
     public static class Utf8SerializedData {
         public String[] data;
         public int offset;
-
-        public Utf8SerializedData(String[] data, int offset) {
-            this.data = data;
-            this.offset = offset;
-        }
     }
 }

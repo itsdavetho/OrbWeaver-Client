@@ -13,19 +13,21 @@ import java.awt.*;
 public class PropHuntTwoOverlay extends Overlay {
     private final PanelComponent panelComponent = new PanelComponent();
     private final Client client;
+    private final PropHuntTwoPlugin plugin;
     private final PropHuntTwoConfig config;
 
     @Inject
-    private PropHuntTwoOverlay(Client client, PropHuntTwoConfig config) {
+    private PropHuntTwoOverlay(Client client, PropHuntTwoConfig config, PropHuntTwoPlugin plugin) {
         setPosition(OverlayPosition.ABOVE_CHATBOX_RIGHT);
         this.client = client;
         this.config = config;
+        this.plugin = plugin;
     }
 
     @Override
     public Dimension render(Graphics2D graphics) {
         panelComponent.getChildren().clear();
-        String overlayTitle = "Prop Hunt 2";
+        String overlayTitle = "Prop Hunt 2 (World " + client.getWorld() + ")";
 
         // Build overlay title
         panelComponent.getChildren().add(TitleComponent.builder()
@@ -41,11 +43,11 @@ public class PropHuntTwoOverlay extends Overlay {
         // Add a line on the overlay for world number
         panelComponent.getChildren().add(LineComponent.builder()
                 .left("Server:")
-                .right(Integer.toString(client.getWorld()))
+                .right(plugin.getServerAddress() + ":" + plugin.getServerPort())
                 .build());
         panelComponent.getChildren().add(LineComponent.builder()
                 .left("Status:")
-                .right("Seeking")
+                .right(plugin.getGameStatus())
                 .build());
         // Show world type goes here ...
 

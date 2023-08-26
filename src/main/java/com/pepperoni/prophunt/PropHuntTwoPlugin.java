@@ -31,34 +31,28 @@ import java.util.List;
         name = "Prop Hunt Two"
 )
 public class PropHuntTwoPlugin extends Plugin {
-    @Inject
-    private Client client;
-
-    @Inject
-    private PropHuntTwoConfig config;
-
-    @Inject
-    private OverlayManager overlayManager;
-
-    @Inject
-    private PropHuntTwoOverlay overlay;
-
-    @Inject
-    private ClientToolbar clientToolbar;
-
-    private PropHuntTwoPanel panel;
-    private NavigationButton navButton;
-
-    private DatagramSocket socket;
     private final PropHuntPackets packets;
     private final MessageHandler messageHandler;
-
+    @Inject
+    private Client client;
+    @Inject
+    private PropHuntTwoConfig config;
+    @Inject
+    private OverlayManager overlayManager;
+    @Inject
+    private PropHuntTwoOverlay overlay;
+    @Inject
+    private ClientToolbar clientToolbar;
+    private PropHuntTwoPanel panel;
+    private NavigationButton navButton;
+    private DatagramSocket socket;
     private InetAddress serverAddress;
     private int serverPort;
     private int clientPort;
     private String playerName = null;
 
     private WorldPoint lastLocation;
+    private String token;
 
     public PropHuntTwoPlugin() {
         this.packets = new PropHuntPackets(this);
@@ -66,7 +60,7 @@ public class PropHuntTwoPlugin extends Plugin {
     }
 
     @Override
-    protected void startUp() throws Exception {
+    protected void startUp() {
         overlayManager.add(overlay);
         panel = new PropHuntTwoPanel(this);
         final BufferedImage icon = ImageUtil.loadImageResource(getClass(), "panel_icon.png");
@@ -81,8 +75,10 @@ public class PropHuntTwoPlugin extends Plugin {
     }
 
     @Override
-    protected void shutDown() throws Exception {
+    protected void shutDown() {
         socket.close();
+        lastLocation = null;
+        playerName = null;
         log.info("Prop Hunt Two stopped!");
     }
 
@@ -110,6 +106,7 @@ public class PropHuntTwoPlugin extends Plugin {
             }
         }
     }
+
     private void startMessageHandlerThread() {
         Thread messageHandlerThread = new Thread(this::handleIncomingMessages);
         messageHandlerThread.start();
@@ -128,6 +125,7 @@ public class PropHuntTwoPlugin extends Plugin {
             }
         }
     }
+
     private void configureServer() {
         try {
             socket = new DatagramSocket();
@@ -210,8 +208,20 @@ public class PropHuntTwoPlugin extends Plugin {
         return serverPort;
     }
 
+    public String getJWT() {
+        return token;
+    }
+
+    public void setJWT(String token) {
+        this.token = token;
+    }
+
+    public String getGameStatus() {
+        return "inactive";
+    }
     @Provides
     PropHuntTwoConfig provideConfig(ConfigManager configManager) {
         return configManager.getConfig(PropHuntTwoConfig.class);
     }
+
 }
