@@ -97,14 +97,21 @@ public class PropHuntTwoPlugin extends Plugin {
                 // player moved, send location packet update
                 getUser().setLocation(client.getLocalPlayer().getWorldLocation());
             }
+
+            if(getUser().getUsername() == null && client.getLocalPlayer().getName() != null) {
+                String playerName = client.getLocalPlayer().getName();
+                getUser().setUsername(playerName);
+                getUser().setWorld(client.getWorld());
+            }
         }
     }
 
     @Subscribe
     public void onGameStateChanged(GameStateChanged event) {
         if (event.getGameState() == GameState.LOGGED_IN) {
-            if (socket == null && client.getLocalPlayer() != null && client.getLocalPlayer().getName() != null && getUser().getUsername() == null) {
+            if (getUser().getUsername() == null && client.getLocalPlayer() != null && client.getLocalPlayer().getName() != null ) {
                 getUser().setUsername(client.getLocalPlayer().getName());
+                getUser().setWorld(client.getWorld());
             }
         }
     }
@@ -222,5 +229,9 @@ public class PropHuntTwoPlugin extends Plugin {
 
     public PropHuntTwoConfig getConfig() {
         return this.config;
+    }
+
+    public ClientThread getClientThread() {
+        return clientThread;
     }
 }

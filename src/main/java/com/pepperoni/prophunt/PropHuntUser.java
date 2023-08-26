@@ -1,8 +1,8 @@
 package com.pepperoni.prophunt;
 
 
-import com.google.inject.Inject;
 import net.runelite.api.Client;
+import net.runelite.api.Player;
 import net.runelite.api.coords.WorldPoint;
 
 import java.io.IOException;
@@ -11,6 +11,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class PropHuntUser {
     private final PropHuntTwoPlugin plugin;
@@ -21,6 +22,7 @@ public class PropHuntUser {
     private String token = null;
     private String groupId = null;
     private boolean loggedIn = false;
+    private int world;
 
     public PropHuntUser(PropHuntTwoPlugin plugin, Client client) {
         this.plugin = plugin;
@@ -32,20 +34,12 @@ public class PropHuntUser {
             plugin.configureServer();
         }
 
-        if (playerName == null) {
-            if (client.getLocalPlayer() != null && client.getLocalPlayer().getName() != null) {
-                playerName = client.getLocalPlayer().getName();
-            }
-        }
-
         if (playerName != null) {
-            int world = client.getWorld();
-
             List<byte[]> packet = plugin.getPacketHandler().createPacket(PacketType.USER_LOGIN, "unauthorized");
             byte[] username = playerName.getBytes(StandardCharsets.UTF_8);
             byte[] password = plugin.getConfig().password().getBytes(StandardCharsets.UTF_8);
             byte[] worldBuffer = new byte[2];
-            ByteBuffer.wrap(worldBuffer).putShort((short) world);
+            ByteBuffer.wrap(worldBuffer).putShort((short) this.world);
 
             List<byte[]> bufferList = new ArrayList<>();
             bufferList.add(new byte[]{(byte) username.length, (byte) password.length});
@@ -141,5 +135,9 @@ public class PropHuntUser {
 
     public void setUsername(String username) {
         this.playerName = username;
+    }
+
+    public void setWorld(int world) {
+        this.world = world;
     }
 }
