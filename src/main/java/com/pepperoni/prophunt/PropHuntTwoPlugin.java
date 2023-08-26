@@ -36,8 +36,12 @@ import java.util.List;
         name = "Prop Hunt Two"
 )
 public class PropHuntTwoPlugin extends Plugin {
-    private final PropHuntPackets packets;
-    private final MessageHandler messageHandler;
+    @Inject
+    private PropHuntPackets packets;
+    @Inject
+    private PropHuntUser user;
+    @Inject
+    private MessageHandler messageHandler;
     @Inject
     private Client client;
 
@@ -61,16 +65,9 @@ public class PropHuntTwoPlugin extends Plugin {
     private InetAddress serverAddress;
     private int serverPort;
     private int clientPort;
-    private String playerName = null;
-
-    private WorldPoint lastLocation = null;
-    private String token = null;
-    private String groupId = null;
-    private boolean loggedIn = false;
 
     public PropHuntTwoPlugin() {
-        this.packets = new PropHuntPackets(this);
-        this.messageHandler = new MessageHandler(this);
+
     }
 
     @Override
@@ -85,22 +82,25 @@ public class PropHuntTwoPlugin extends Plugin {
     @Override
     protected void shutDown() {
         commandManager.unregisterCommand("!panel");
-        logout();
+        user.logout();
         overlayManager.remove(overlay);
         panel = null;
         clientToolbar.removeNavigation(navButton);
-        lastLocation = null;
-        playerName = null;
-        socket.close();
+        getUser().setLocation(null);
+        getUser().setUsername(null);
+        user.setJWT(null);
+        user.setGroupId(null);
+        user.setLoggedIn(false);
+       // socket.close();
         log.info("Prop Hunt Two stopped!");
     }
 
     @Subscribe
     public void onGameTick(GameTick tick) {
         if (client.getLocalPlayer() != null) {
-            if (lastLocation != client.getLocalPlayer().getWorldLocation()) {
+            if (getUser().getLastLocation() != client.getLocalPlayer().getWorldLocation()) {
                 // player moved, send location packet update
-                lastLocation = client.getLocalPlayer().getWorldLocation();
+                getUser().setLocation(client.getLocalPlayer().getWorldLocation());
             }
         }
     }
@@ -108,8 +108,8 @@ public class PropHuntTwoPlugin extends Plugin {
     @Subscribe
     public void onGameStateChanged(GameStateChanged event) {
         if (event.getGameState() == GameState.LOGGED_IN) {
-            if (socket == null && client.getLocalPlayer() != null && client.getLocalPlayer().getName() != null && playerName == null) {
-                playerName = client.getLocalPlayer().getName();
+            if (socket == null && client.getLocalPlayer() != null && client.getLocalPlayer().getName() != null && getUser().getUsername() == null) {
+                getUser().setUsername(client.getLocalPlayer().getName());
             }
         }
     }
@@ -138,6 +138,9 @@ public class PropHuntTwoPlugin extends Plugin {
         clientToolbar.addNavigation(navButton);
     }
 
+    public PropHuntTwoPanel getPanel() {
+        return panel;
+    }
 
     private void startMessageHandlerThread() {
         Thread messageHandlerThread = new Thread(this::handleIncomingMessages);
@@ -158,7 +161,7 @@ public class PropHuntTwoPlugin extends Plugin {
         }
     }
 
-    private void configureServer() {
+    public void configureServer() {
         try {
             socket = new DatagramSocket();
             String[] server = config.server().split(":");
@@ -179,7 +182,7 @@ public class PropHuntTwoPlugin extends Plugin {
                     serverAddress = InetAddress.getByName(hostname);
                     if (serverAddress instanceof Inet4Address) {
                         String serverString = serverAddress.getHostName() + ":" + serverPort;
-                        clientThread.invokeLater(() -> client.addChatMessage(ChatMessageType.PRIVATECHAT, "Prop Hunt", "Connecting (" + serverString + ")...", "Prop Hunt"));
+                        sendPrivateMessage("Connecting (" + serverString + ")...");
                         startMessageHandlerThread();
                     } else {
                         System.out.println("Invalid IPv6 Address.");
@@ -191,89 +194,6 @@ public class PropHuntTwoPlugin extends Plugin {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    public void login() throws IOException {
-        if (socket == null) {
-            configureServer();
-        }
-
-        if (playerName == null) {
-            if (client.getLocalPlayer() != null && client.getLocalPlayer().getName() != null) {
-                playerName = client.getLocalPlayer().getName();
-            }
-        }
-
-        if (playerName != null) {
-            int world = client.getWorld();
-
-            List<byte[]> packet = packets.createPacket(PacketType.USER_LOGIN, "unauthorized");
-            byte[] username = playerName.getBytes(StandardCharsets.UTF_8);
-            byte[] password = config.password().getBytes(StandardCharsets.UTF_8);
-            byte[] worldBuffer = new byte[2];
-            ByteBuffer.wrap(worldBuffer).putShort((short) world);
-
-            List<byte[]> bufferList = new ArrayList<>();
-            bufferList.add(new byte[]{(byte) username.length, (byte) password.length});
-            bufferList.add(username);
-            bufferList.add(password);
-            bufferList.add(worldBuffer);
-
-            packet.addAll(bufferList);
-
-            packets.sendPacket(packet);
-        } else {
-            System.out.println("Failed to login: local player not found");
-        }
-    }
-
-    public void logout() {
-        if (getLoggedIn() && token != null && socket != null) {
-            List<byte[]> packet = packets.createPacket(PacketType.USER_LOGOUT, token);
-            packets.sendPacket(packet);
-        }
-    }
-
-    public boolean getLoggedIn() {
-        return this.loggedIn;
-    }
-
-    public void setLoggedIn(boolean loggedIn) {
-        this.loggedIn = loggedIn;
-        panel.updateLoginLogoutButton();
-    }
-
-    public void createGroup(String jwt) {
-        List<byte[]> packet = getPacketHandler().createPacket(PacketType.GROUP_NEW, jwt);
-        getPacketHandler().sendPacket(packet);
-    }
-
-    public String getGroupId() {
-        return groupId;
-    }
-
-    public void setGroupId(String groupId) {
-        this.groupId = groupId;
-        panel.setGroupTextField(groupId);
-        panel.updateLeaveJoinGroupButton();
-    }
-
-    public void joinGroup(String groupId) throws UnsupportedEncodingException {
-        if (getLoggedIn() && getJWT() != null && getGroupId() == null) {
-            List<byte[]> packet = getPacketHandler().createPacket(PacketType.GROUP_JOIN, getJWT());
-            byte[] groupBuffer = groupId.getBytes(StandardCharsets.UTF_8);
-            List<byte[]> bufferList = new ArrayList<>();
-            bufferList.add(new byte[]{(byte) groupBuffer.length});
-            bufferList.add(groupBuffer);
-            packet.addAll(bufferList);
-            packets.sendPacket(packet);
-        } else {
-            sendPrivateMessage("Could not join group. Are you logged in or already in a group?");
-        }
-    }
-
-    public void leaveGroup() {
-
     }
 
     public DatagramSocket getSocket() {
@@ -292,16 +212,8 @@ public class PropHuntTwoPlugin extends Plugin {
         return serverPort;
     }
 
-    public String getJWT() {
-        return token;
-    }
-
-    public void setJWT(String token) {
-        this.token = token;
-    }
-
-    public String getGameStatus() {
-        return "inactive";
+    public PropHuntUser getUser() {
+        return this.user;
     }
 
     @Provides
@@ -311,5 +223,9 @@ public class PropHuntTwoPlugin extends Plugin {
 
     public void sendPrivateMessage(String message) {
         clientThread.invokeLater(() -> client.addChatMessage(ChatMessageType.PRIVATECHAT, "Prop Hunt", message, "Prop Hunt"));
+    }
+
+    public PropHuntTwoConfig getConfig() {
+        return this.config;
     }
 }

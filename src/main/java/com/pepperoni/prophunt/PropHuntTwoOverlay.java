@@ -47,7 +47,7 @@ public class PropHuntTwoOverlay extends Overlay {
                 .build());
         panelComponent.getChildren().add(LineComponent.builder()
                 .left("Status:")
-                .right(plugin.getGameStatus())
+                .right(plugin.getUser().getGameStatus())
                 .build());
         // Show world type goes here ...
 

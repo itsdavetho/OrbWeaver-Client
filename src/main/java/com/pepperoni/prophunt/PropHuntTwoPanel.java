@@ -43,21 +43,21 @@ public class PropHuntTwoPanel extends PluginPanel implements ActionListener {
 
         JButton buttonCreateParty = new JButton("Create Group");
         buttonCreateParty.addActionListener(e -> {
-            plugin.createGroup(plugin.getJWT());
+            plugin.getUser().createGroup(plugin.getUser().getJWT());
         });
 
         add(buttonCreateParty, gridBagConstraints);
         gridBagConstraints.gridy++;
 
         leaveJoinGroupButton.addActionListener(e -> {
-            if (plugin.getGroupId() == null) {
+            if (plugin.getUser().getGroupId() == null) {
                 try {
-                    plugin.joinGroup(textFieldJoinParty.getText());
+                    plugin.getUser().joinGroup(textFieldJoinParty.getText());
                 } catch (UnsupportedEncodingException ex) {
                     plugin.sendPrivateMessage("Could not join group. Was that a valid ID?");
                 }
             } else {
-                plugin.leaveGroup();
+                plugin.getUser().leaveGroup();
             }
         });
 
@@ -97,10 +97,10 @@ public class PropHuntTwoPanel extends PluginPanel implements ActionListener {
 
         loginLogout.addActionListener(e -> {
             try {
-                if (plugin.getLoggedIn() == false) {
-                    plugin.login();
+                if (plugin.getUser().getLoggedIn() == false) {
+                    plugin.getUser().login();
                 } else {
-                    plugin.logout();
+                    plugin.getUser().logout();
                 }
             } catch (IOException ex) {
                 ex.printStackTrace();
@@ -149,7 +149,7 @@ public class PropHuntTwoPanel extends PluginPanel implements ActionListener {
     }
 
     public void updateLoginLogoutButton() {
-        if (plugin.getLoggedIn()) {
+        if (plugin.getUser().getLoggedIn()) {
             this.loginLogout.setText("Logout");
         } else {
             this.loginLogout.setText("Login");
@@ -157,7 +157,7 @@ public class PropHuntTwoPanel extends PluginPanel implements ActionListener {
     }
 
     public void updateLeaveJoinGroupButton() {
-        if (plugin.getGroupId() != null) {
+        if (plugin.getUser().getGroupId() != null) {
             this.leaveJoinGroupButton.setText("Leave Group");
         } else {
             this.leaveJoinGroupButton.setText("Join Group");

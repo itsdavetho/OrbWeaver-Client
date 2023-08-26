@@ -42,9 +42,9 @@ public class MessageHandler {
             int size = 1;
             Utf8Serializer.Utf8SerializedData utf8Data = Utf8Serializer.serialize(data, size, offset);
             offset = utf8Data.offset;
-            plugin.setJWT(utf8Data.data[0]);
+            plugin.getUser().setJWT(utf8Data.data[0]);
             //plugin.createGroup(plugin.getJWT());
-            plugin.setLoggedIn(true);
+            plugin.getUser().setLoggedIn(true);
         } else if (action == PacketType.ERROR_MESSAGE.getIndex()) {
             // int dataValue = ByteBuffer.wrap(data, offset + 1, 2).getShort();
             //  if (Errors.Errors[dataValue] != null) {
@@ -85,9 +85,10 @@ public class MessageHandler {
             String groupId = new String(groupIdBuffer, StandardCharsets.UTF_8);
             offset += groupIdLength;
             System.out.println("Received group info (creator: " + creatorUsername + ", GID: " + groupId + ")");
-            plugin.setGroupId(groupId);
+            plugin.getUser().setGroupId(groupId);
         } else if (action == PacketType.GROUP_LEAVE.getIndex()) {
-            plugin.setGroupId(null);
+            plugin.sendPrivateMessage("You have left the Prop Hunt group");
+            plugin.getUser().setGroupId(null);
         } else {
             System.out.println("Unknown MSG recv: " + ByteBuffer.wrap(data) + " action " + action);
         }
