@@ -24,6 +24,8 @@ import javax.swing.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @PluginDescriptor(
@@ -59,12 +61,14 @@ public class PropHuntTwoPlugin extends Plugin {
     private InetAddress serverAddress;
     private int serverPort;
     //private int clientPort;
+    private List<PropHuntPlayerUpdate> players = new ArrayList<>();
 
     public PropHuntTwoPlugin() {
         packets = new PropHuntPackets(this);
         user = new PropHuntUser(this, client);
         messageHandler = new MessageHandler(this);
     }
+
     @Override
     protected void startUp() {
         commandManager.registerCommandAsync("!panel", this::reloadPanel);
@@ -94,11 +98,10 @@ public class PropHuntTwoPlugin extends Plugin {
     public void onGameTick(GameTick tick) {
         if (client.getLocalPlayer() != null) {
             if (getUser().getLastLocation() != client.getLocalPlayer().getWorldLocation()) {
-                // player moved, send location packet update
                 getUser().setLocation(client.getLocalPlayer().getWorldLocation());
             }
 
-            if(getUser().getUsername() == null && client.getLocalPlayer().getName() != null) {
+            if (getUser().getUsername() == null && client.getLocalPlayer().getName() != null) {
                 String playerName = client.getLocalPlayer().getName();
                 getUser().setUsername(playerName);
                 getUser().setWorld(client.getWorld());
@@ -109,7 +112,7 @@ public class PropHuntTwoPlugin extends Plugin {
     @Subscribe
     public void onGameStateChanged(GameStateChanged event) {
         if (event.getGameState() == GameState.LOGGED_IN) {
-            if (getUser().getUsername() == null && client.getLocalPlayer() != null && client.getLocalPlayer().getName() != null ) {
+            if (getUser().getUsername() == null && client.getLocalPlayer() != null && client.getLocalPlayer().getName() != null) {
                 getUser().setUsername(client.getLocalPlayer().getName());
                 getUser().setWorld(client.getWorld());
             }
@@ -233,5 +236,9 @@ public class PropHuntTwoPlugin extends Plugin {
 
     public ClientThread getClientThread() {
         return clientThread;
+    }
+
+    public void updatePlayers(List<PropHuntPlayerUpdate> propHuntPlayerUpdate) {
+        this.players = propHuntPlayerUpdate;
     }
 }

@@ -2,7 +2,6 @@ package com.pepperoni.prophunt;
 
 
 import net.runelite.api.Client;
-import net.runelite.api.Player;
 import net.runelite.api.coords.WorldPoint;
 
 import java.io.IOException;
@@ -11,7 +10,6 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class PropHuntUser {
     private final PropHuntTwoPlugin plugin;
@@ -30,7 +28,7 @@ public class PropHuntUser {
     }
 
     public void login() throws IOException {
-        if (plugin.getSocket() == null) {
+        if (plugin.getSocket() == null || getUsername() == null) {
             plugin.configureServer();
         }
 
@@ -123,6 +121,7 @@ public class PropHuntUser {
 
     public void setLocation(WorldPoint loc) {
         this.lastLocation = loc;
+        plugin.getPacketHandler().createPacket(PacketType.PLAYER_UPDATES, getJWT());
     }
 
     public WorldPoint getLastLocation() {

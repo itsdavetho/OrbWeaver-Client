@@ -50,25 +50,29 @@ public class MessageHandler {
             //  if (Errors.Errors[dataValue] != null) {
             System.out.println("ERROR RECV: "/* + Errors.Errors[dataValue]*/);
             // }
-        } else if (action == PacketType.GROUP_USERS.getIndex()) {
-            List<String> usernames = new ArrayList<>();
+        } else if (action == PacketType.PLAYER_UPDATES.getIndex()) {
+            List<PropHuntPlayerUpdate> players = new ArrayList<>();
+            ByteBuffer buffer = ByteBuffer.wrap(data, offset, message.getLength() - offset);
 
-            while (offset + 2 < data.length) { // Ensure enough bytes for username length
-                int usernameLength = ByteBuffer.wrap(data, offset, 2).getShort();
-                offset += 2;
+            while (buffer.remaining() > 0) {
+                short propId = buffer.getShort();
+                byte propType = buffer.get();
+                byte orientation = buffer.get();
+                byte team = buffer.get();
+                byte status = buffer.get();
+                int nameLength = buffer.get();
+                byte[] usernameBytes = new byte[nameLength];
+                buffer.get(usernameBytes);
+                String username = new String(usernameBytes, StandardCharsets.UTF_8);
 
-                if (offset + usernameLength > data.length) {
-                    break;
-                }
-
-                byte[] usernameBuffer = new byte[usernameLength];
-                System.arraycopy(data, offset, usernameBuffer, 0, usernameLength);
-                offset += usernameLength;
-                String username = new String(usernameBuffer, StandardCharsets.UTF_8);
-                usernames.add(username);
+                PropHuntPlayerUpdate playerUpdate = new PropHuntPlayerUpdate(propId, propType, orientation, team, status, username);
+                players.add(playerUpdate);
             }
-            System.out.println("joined group - " + usernames.size() + " users online: ");
-            System.out.println(usernames);
+            plugin.updatePlayers(players);
+            // Process the received user data
+            for (PropHuntPlayerUpdate player : players) {
+                System.out.println("Received user data: " + player);
+            }
         } else if (action == PacketType.GROUP_INFO.getIndex()) {
             int creatorUsernameLength = message.getData()[offset];
             offset++;

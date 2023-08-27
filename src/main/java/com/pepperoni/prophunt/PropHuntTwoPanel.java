@@ -164,7 +164,6 @@ public class PropHuntTwoPanel extends PluginPanel implements ActionListener {
         }
     }
 
-
     @Override
     public void actionPerformed(ActionEvent e) {
 
