@@ -24,8 +24,8 @@ import javax.swing.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @PluginDescriptor(
@@ -37,7 +37,7 @@ public class PropHuntTwoPlugin extends Plugin {
 
     private final PropHuntUser user;
 
-    private final MessageHandler messageHandler;
+    private final PacketHandler packetHandler;
     @Inject
     private Client client;
 
@@ -61,12 +61,12 @@ public class PropHuntTwoPlugin extends Plugin {
     private InetAddress serverAddress;
     private int serverPort;
     //private int clientPort;
-    private List<PropHuntPlayerUpdate> players = new ArrayList<>();
+    private Map<String, PropHuntPlayer> players = new HashMap<>();
 
     public PropHuntTwoPlugin() {
         packets = new PropHuntPackets(this);
         user = new PropHuntUser(this, client);
-        messageHandler = new MessageHandler(this);
+        packetHandler = new PacketHandler(this);
     }
 
     @Override
@@ -159,7 +159,7 @@ public class PropHuntTwoPlugin extends Plugin {
             DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
             try {
                 socket.receive(packet); // This call blocks until a packet is received
-                messageHandler.handleMessage(packet);
+                packetHandler.handlePacket(packet);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -238,7 +238,7 @@ public class PropHuntTwoPlugin extends Plugin {
         return clientThread;
     }
 
-    public void updatePlayers(List<PropHuntPlayerUpdate> propHuntPlayerUpdate) {
-        this.players = propHuntPlayerUpdate;
+    public void updatePlayers(HashMap<String, PropHuntPlayer> propHuntPlayer) {
+        this.players = propHuntPlayer;
     }
 }

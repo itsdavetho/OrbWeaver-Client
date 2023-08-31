@@ -22,7 +22,14 @@ enum PacketType {
     GROUP_END_GAME,
     GROUP_SET_STAGE,
     GROUP_NOTIFY,
-    PLAYER_UPDATES,
+    PLAYER_LIST,
+
+    PLAYER_UPDATE, // all update_ packets are sent with player_update
+        UPDATE_PROP,
+        UPDATE_LOCATION,
+        UPDATE_TEAM,
+        UPDATE_STATUS,
+    PLAYER_LOCATION,
     PLAYER_PROP,
     PLAYER_NOTIFY,
 

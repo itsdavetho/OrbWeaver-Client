@@ -121,7 +121,7 @@ public class PropHuntUser {
 
     public void setLocation(WorldPoint loc) {
         this.lastLocation = loc;
-        plugin.getPacketHandler().createPacket(PacketType.PLAYER_UPDATES, getJWT());
+        plugin.getPacketHandler().createPacket(PacketType.PLAYER_LOCATION, getJWT());
     }
 
     public WorldPoint getLastLocation() {
