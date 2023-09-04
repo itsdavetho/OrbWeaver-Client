@@ -9,7 +9,6 @@ import java.net.DatagramSocket;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 import javax.swing.SwingUtilities;
@@ -107,9 +106,16 @@ public class PropHuntTwoPlugin extends Plugin
 	{
 		if (client.getLocalPlayer() != null)
 		{
-			if (getUser().getLastLocation() != null && client.getLocalPlayer() != null && client.getLocalPlayer().getWorldLocation() != null && !getUser().getLastLocation().equals(client.getLocalPlayer().getWorldLocation()))
+			if (client.getLocalPlayer().getWorldLocation() != null)
 			{
-				getUser().setLocation(client.getLocalPlayer().getWorldLocation());
+				if (getUser().getLastLocation() != null && !getUser().getLastLocation().equals(client.getLocalPlayer().getWorldLocation()))
+				{
+					getUser().setLocation(client.getLocalPlayer().getWorldLocation());
+				}
+				else if (getUser().getLastLocation() == null)
+				{
+					getUser().setLocation(client.getLocalPlayer().getWorldLocation());
+				}
 			}
 
 			if (getUser().getUsername() == null && client.getLocalPlayer().getName() != null)
@@ -297,42 +303,39 @@ public class PropHuntTwoPlugin extends Plugin
 	}
 
 	// update the player in the region (location or prop data)
-	public void updatePlayer(short userIdToUpdate, short updateType, ByteBuffer buffer)
+	public void updatePlayer(short updateType, short userIdToUpdate, byte[] data, int offset)
 	{
 		if (!this.players.containsKey(userIdToUpdate))
 		{
-			System.out.println("Attempted to update a player, but they did not exist!");
+			//System.out.println("Attempted to update a player, but they did not exist!");
 			return;
 		}
 		if (updateType < 0 || updateType >= PlayerUpdate.values().length)
 		{
-			System.out.println("invalid update type received");
+			System.out.println("invalid update type received: " + userIdToUpdate + " " + updateType + " " + PlayerUpdate.values().length);
 			return;
 		}
 		PropHuntPlayer player = this.players.get(userIdToUpdate);
 		if (updateType == PlayerUpdate.LOCATION.getIndex())
 		{
-			// Read location and orientation data
-			short x = buffer.getShort();
-			short y = buffer.getShort();
-			byte z = buffer.get();
-			short orientation = buffer.getShort();
+			int x = ((data[offset] & 0xFF) << 8) | (data[offset + 1] & 0xFF); // read the x coordinate as an unsigned short
+			offset += 2;
+			int y = ((data[offset] & 0xFF) << 8) | (data[offset + 1] & 0xFF); // read the y coordinate as an unsigned short
+			offset += 2;
+			int z = Byte.toUnsignedInt(data[offset]); // read the z coordinate as an unsigned byte
+			offset++;
+			int orientation = ((data[offset] & 0xFF) << 8) | (data[offset + 1] & 0xFF); // read the orientation as an unsigned short
+			offset += 2;
+
 			player.setLocation(x, y, z);
-			player.setOrientation(orientation);
+			player.setOrientation((short) orientation);
 		}
 		else if (updateType == PlayerUpdate.PROP.getIndex())
 		{
-			short propId = buffer.getShort();
-			byte propType = buffer.get();
-			if (propType == 0)
-			{
-				propType = 0;
-			}
-			else
-			{
-				propType = 1;
-			}
-			player.setProp(propId, propType);
+			/*
+			short propId = 0;
+			byte propType = 0;
+			player.setProp(propId, propType);*/
 		}
 	}
 }

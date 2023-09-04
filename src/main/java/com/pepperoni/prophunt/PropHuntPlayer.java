@@ -17,6 +17,12 @@ public class PropHuntPlayer
 		this.username = username;
 	}
 
+	public String getUsername()
+	{
+		return this.username;
+
+	}
+
 	public short getPropId()
 	{
 		return propId;

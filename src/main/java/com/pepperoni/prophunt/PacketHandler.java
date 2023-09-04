@@ -4,7 +4,6 @@ import java.net.DatagramPacket;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.Map;
 
 
 public class PacketHandler
@@ -31,11 +30,9 @@ public class PacketHandler
 
 	public void handlePacket(DatagramPacket packet)
 	{
-		debugPacket(packet);
 		int offset = 0;
 		byte[] data = packet.getData();
 		byte packetType = data[0];
-		System.out.println("packet recv " + packetType);
 
 		if (packetType < 0 || packetType >= PacketType.values().length)
 		{
@@ -64,34 +61,30 @@ public class PacketHandler
 		{
 			try
 			{
-				System.out.println("received PLAYER_LIST:");
 				HashMap<Short, PropHuntPlayer> players = new HashMap<>();
+				int length = ((data[offset] & 0xFF) << 8) | (data[offset + 1] & 0xFF); // packet length 2 byte uint16
+				offset += 2;
 
-				// create a byte buffer to wrap the data from the offset
-				ByteBuffer pbuffer = ByteBuffer.wrap(data, offset, data.length - offset);
+				while (offset < length) {
+					int userId = ((data[offset] & 0xFF) << 8) | (data[offset + 1] & 0xFF); // userid 2 byte uint16
+					offset += 2;
+					int usernameLength = data[offset] & 0xFF; // username length 1byte uint8
+					offset++;
+					String username = new String(data, offset, usernameLength, StandardCharsets.UTF_8); // username utf8 * usernameLength
+					offset += usernameLength;
 
-				while (pbuffer.hasRemaining()) {
-					// read the user id from two bytes
-					short userId = pbuffer.getShort();
-					// read the username length from one byte
-					byte nameLength = pbuffer.get();
-					// read the username bytes from the buffer
-					byte[] usernameBytes = new byte[nameLength];
-					pbuffer.get(usernameBytes);
-					// convert the username bytes to a string using UTF-8 encoding
-					String username = new String(usernameBytes, StandardCharsets.UTF_8);
-
-					PropHuntPlayer playerUpdate = new PropHuntPlayer(username);
-					System.out.println("username length " + nameLength + " username " + username + " " + userId);
-					players.put(userId, playerUpdate);
+					// Process the user data (userId and username)
+					System.out.println("user: " + userId + ", usernameLength: " + usernameLength + ", username: " + username);
+					PropHuntPlayer player = new PropHuntPlayer(username);
+					players.put((short) userId, player);
 				}
 
-				System.out.println("player data: " + packet.toString());
+				//debugPacket(packet);
 				plugin.updatePlayers(players);
 
-				for (Map.Entry<Short, PropHuntPlayer> player : players.entrySet()) {
-					System.out.println("Received user data: " + player);
-				}
+				//	for (Map.Entry<Short, PropHuntPlayer> player : players.entrySet()) {
+				//	System.out.println("Received user data: " + player);
+				//}
 			}
 			catch (Exception e)
 			{
@@ -100,10 +93,11 @@ public class PacketHandler
 		}
 		else if (packetType == PacketType.PLAYER_UPDATE.getIndex())
 		{
-			ByteBuffer buffer = ByteBuffer.wrap(data, offset, packet.getLength());
-			short updateType = buffer.getShort();
-			short userIdToUpdate = buffer.getShort();
-			plugin.updatePlayer(userIdToUpdate, updateType, buffer);
+			short updateType = (short) ((short) data[offset] & 0xFF); // update type 1byte uint8
+			offset++;
+			short userIdToUpdate = (short) ((short) ((data[offset] & 0xFF) << 8) | (data[offset + 1] & 0xFF)); // 2 bytes uint16
+			offset += 2;
+			plugin.updatePlayer(updateType, userIdToUpdate, data, offset);
 
 		}
 		else if (packetType == PacketType.GROUP_INFO.getIndex())

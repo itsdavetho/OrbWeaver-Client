@@ -129,7 +129,7 @@ public class PropHuntUser {
 		this.lastLocation = loc;
 
 		List<byte[]> packet = plugin.getPacketHandler().createPacket(PacketType.PLAYER_UPDATE, getJWT());
-		System.out.println("updating location");
+		//System.out.println("updating location");
 
 		ByteBuffer buffer = ByteBuffer.allocate(1 + 2 + 2 + 1 + 2); //2 bytes for x, 2 bytes for y, 1 byte for z, and 2 bytes for orientation
 		buffer.put((byte) PlayerUpdate.LOCATION.getIndex());
