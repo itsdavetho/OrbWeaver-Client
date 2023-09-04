@@ -107,7 +107,7 @@ public class PropHuntTwoPlugin extends Plugin
 	{
 		if (client.getLocalPlayer() != null)
 		{
-			if (!getUser().getLastLocation().equals(client.getLocalPlayer().getWorldLocation()))
+			if (getUser().getLastLocation() != null && client.getLocalPlayer() != null && client.getLocalPlayer().getWorldLocation() != null && !getUser().getLastLocation().equals(client.getLocalPlayer().getWorldLocation()))
 			{
 				getUser().setLocation(client.getLocalPlayer().getWorldLocation());
 			}

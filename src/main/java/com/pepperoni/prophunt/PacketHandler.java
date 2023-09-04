@@ -26,7 +26,7 @@ public class PacketHandler
 		String packetContent = new String(data, 0, length, StandardCharsets.UTF_8);
 
 		System.out.println("Received packet from " + remoteAddress + ":" + remotePort);
-		System.out.println("Packet content: " + packetContent);
+		System.out.println("Packet content: " + packetContent.toString());
 	}
 
 	public void handlePacket(DatagramPacket packet)
@@ -54,33 +54,48 @@ public class PacketHandler
 		}
 		else if (packetType == PacketType.ERROR_MESSAGE.getIndex())
 		{
-			ByteBuffer buffer = ByteBuffer.wrap(data, offset, packet.getLength() - offset);
+			ByteBuffer buffer = ByteBuffer.wrap(data, offset, packet.getLength());
 			short dataValue = buffer.getShort();
 			//  if (Errors.Errors[dataValue] != null) {
 			System.out.println("ERROR RECV: " + dataValue);
-			 //}
+			//}
 		}
 		else if (packetType == PacketType.PLAYER_LIST.getIndex())
 		{
-			System.out.println("received PLAYER_LIST:");
-			HashMap<Short, PropHuntPlayer> players = new HashMap<>();
-			ByteBuffer buffer = ByteBuffer.wrap(data, offset, packet.getLength() - offset);
-
-			while (buffer.remaining() > 0)
+			try
 			{
-				short userId = buffer.getShort();
-				byte nameLength = buffer.get();
-				byte[] usernameBytes = new byte[nameLength];
-				buffer.get(usernameBytes);
-				String username = new String(usernameBytes, StandardCharsets.UTF_8);
+				System.out.println("received PLAYER_LIST:");
+				HashMap<Short, PropHuntPlayer> players = new HashMap<>();
 
-				PropHuntPlayer playerUpdate = new PropHuntPlayer(username);
-				players.put(userId, playerUpdate);
+				// create a byte buffer to wrap the data from the offset
+				ByteBuffer pbuffer = ByteBuffer.wrap(data, offset, data.length - offset);
+
+				while (pbuffer.hasRemaining()) {
+					// read the user id from two bytes
+					short userId = pbuffer.getShort();
+					// read the username length from one byte
+					byte nameLength = pbuffer.get();
+					// read the username bytes from the buffer
+					byte[] usernameBytes = new byte[nameLength];
+					pbuffer.get(usernameBytes);
+					// convert the username bytes to a string using UTF-8 encoding
+					String username = new String(usernameBytes, StandardCharsets.UTF_8);
+
+					PropHuntPlayer playerUpdate = new PropHuntPlayer(username);
+					System.out.println("username length " + nameLength + " username " + username + " " + userId);
+					players.put(userId, playerUpdate);
+				}
+
+				System.out.println("player data: " + packet.toString());
+				plugin.updatePlayers(players);
+
+				for (Map.Entry<Short, PropHuntPlayer> player : players.entrySet()) {
+					System.out.println("Received user data: " + player);
+				}
 			}
-			plugin.updatePlayers(players);
-			for (Map.Entry<Short, PropHuntPlayer> player : players.entrySet())
+			catch (Exception e)
 			{
-				System.out.println("Received user data: " + player);
+				e.printStackTrace();
 			}
 		}
 		else if (packetType == PacketType.PLAYER_UPDATE.getIndex())
