@@ -107,7 +107,7 @@ public class PropHuntTwoPlugin extends Plugin
 	{
 		if (client.getLocalPlayer() != null)
 		{
-			if (getUser().getLastLocation() != client.getLocalPlayer().getWorldLocation())
+			if (!getUser().getLastLocation().equals(client.getLocalPlayer().getWorldLocation()))
 			{
 				getUser().setLocation(client.getLocalPlayer().getWorldLocation());
 			}
@@ -310,7 +310,7 @@ public class PropHuntTwoPlugin extends Plugin
 			return;
 		}
 		PropHuntPlayer player = this.players.get(userIdToUpdate);
-		if (updateType == PlayerUpdate.UPDATE_LOCATION.getIndex())
+		if (updateType == PlayerUpdate.LOCATION.getIndex())
 		{
 			// Read location and orientation data
 			short x = buffer.getShort();
@@ -320,7 +320,7 @@ public class PropHuntTwoPlugin extends Plugin
 			player.setLocation(x, y, z);
 			player.setOrientation(orientation);
 		}
-		else if (updateType == PlayerUpdate.UPDATE_PROP.getIndex())
+		else if (updateType == PlayerUpdate.PROP.getIndex())
 		{
 			short propId = buffer.getShort();
 			byte propType = buffer.get();

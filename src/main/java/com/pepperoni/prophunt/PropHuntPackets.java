@@ -9,55 +9,49 @@ import java.util.List;
 import java.util.Map;
 
 enum PacketType {
-    USER_LOGIN,
-    USER_GET_JWT,
-    USER_LOGOUT,
+	USER_LOGIN,
+	USER_GET_JWT,
+	USER_LOGOUT,
 
-    GROUP_NEW,
-    GROUP_JOIN,
-    GROUP_LEAVE,
-    GROUP_USERS,
-    GROUP_INFO,
-    GROUP_START_GAME,
-    GROUP_END_GAME,
-    GROUP_SET_STAGE,
-    GROUP_NOTIFY,
-    PLAYER_LIST,
+	GROUP_NEW,
+	GROUP_JOIN,
+	GROUP_LEAVE,
+	GROUP_USERS,
+	GROUP_INFO,
+	GROUP_START_GAME,
+	GROUP_END_GAME,
+	GROUP_SET_STAGE,
+	PLAYER_LIST,
+	PLAYER_UPDATE, // PLAYER_UPDATE opcode is followed by PlayerUpdate type found below
 
-    PLAYER_UPDATE, // all update_ packets are sent with player_update
+	ERROR_MESSAGE;
 
-    PLAYER_LOCATION,
-    PLAYER_PROP,
-    PLAYER_NOTIFY,
+	private static final Map<Integer, PacketType> indexToEnumMap = new HashMap<>();
 
-    ERROR_MESSAGE;
+	static {
+		int index = 0;
+		for (PacketType packetType : PacketType.values()) {
+			packetType.index = index++;
+			indexToEnumMap.put(packetType.index, packetType);
+		}
+	}
 
-    private static final Map<Integer, PacketType> indexToEnumMap = new HashMap<>();
+	private int index;
 
-    static {
-        int index = 0;
-        for (PacketType packetType : PacketType.values()) {
-            packetType.index = index++;
-            indexToEnumMap.put(packetType.index, packetType);
-        }
-    }
+	public static PacketType fromIndex(int index) {
+		return indexToEnumMap.get(index);
+	}
 
-    private int index;
-
-    public static PacketType fromIndex(int index) {
-        return indexToEnumMap.get(index);
-    }
-
-    public int getIndex() {
-        return index;
-    }
+	public int getIndex() {
+		return index;
+	}
 }
 
 enum PlayerUpdate {
-	UPDATE_PROP,
-	UPDATE_LOCATION,
-	UPDATE_TEAM,
-	UPDATE_STATUS;
+	PROP,
+	LOCATION,
+	TEAM,
+	STATUS;
 
 	private static final Map<Integer, PlayerUpdate> indexToEnumMap = new HashMap<>();
 

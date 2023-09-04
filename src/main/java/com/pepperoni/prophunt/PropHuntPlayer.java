@@ -10,7 +10,7 @@ public class PropHuntPlayer
 	private WorldPoint location;
 	private byte team;
 	private byte status;
-	private String username;
+	private final String username;
 
 	public PropHuntPlayer(String username)
 	{

@@ -2,6 +2,7 @@ package com.pepperoni.prophunt;
 
 
 import net.runelite.api.Client;
+import net.runelite.api.Player;
 import net.runelite.api.coords.WorldPoint;
 
 import java.io.IOException;
@@ -57,6 +58,10 @@ public class PropHuntUser {
         if (getLoggedIn() && token != null && plugin.getSocket() != null) {
             List<byte[]> packet = plugin.getPacketHandler().createPacket(PacketType.USER_LOGOUT, token);
             plugin.getPacketHandler().sendPacket(packet);
+			this.setLoggedIn(false);
+			this.token = null;
+			this.groupId = "";
+			System.out.println("yes");
         }
     }
 
@@ -99,7 +104,8 @@ public class PropHuntUser {
     }
 
     public void leaveGroup() {
-        if (getLoggedIn() && getJWT() != null && getGroupId() != null) {
+		System.out.println(getLoggedIn() + " " + getJWT());
+        if (getLoggedIn() && getJWT() != null) {
             List<byte[]> packet = plugin.getPacketHandler().createPacket(PacketType.GROUP_LEAVE, getJWT());
             plugin.getPacketHandler().sendPacket(packet);
         } else {
@@ -119,10 +125,25 @@ public class PropHuntUser {
         return "inactive";
     }
 
-    public void setLocation(WorldPoint loc) {
-        this.lastLocation = loc;
-        plugin.getPacketHandler().createPacket(PacketType.PLAYER_LOCATION, getJWT());
-    }
+	public void setLocation(WorldPoint loc) {
+		this.lastLocation = loc;
+
+		List<byte[]> packet = plugin.getPacketHandler().createPacket(PacketType.PLAYER_UPDATE, getJWT());
+		System.out.println("updating location");
+
+		ByteBuffer buffer = ByteBuffer.allocate(1 + 2 + 2 + 1 + 2); //2 bytes for x, 2 bytes for y, 1 byte for z, and 2 bytes for orientation
+		buffer.put((byte) PlayerUpdate.LOCATION.getIndex());
+		buffer.putShort((short) loc.getX());
+		buffer.putShort((short) loc.getY());
+		buffer.put((byte) loc.getPlane());
+		buffer.putShort((short) 512);
+
+		byte[] locationData = buffer.array();
+
+		packet.add(locationData);
+
+		plugin.getPacketHandler().sendPacket(packet);
+	}
 
     public WorldPoint getLastLocation() {
         return this.lastLocation;

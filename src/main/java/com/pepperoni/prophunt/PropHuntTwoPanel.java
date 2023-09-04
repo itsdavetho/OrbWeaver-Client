@@ -52,7 +52,10 @@ public class PropHuntTwoPanel extends PluginPanel implements ActionListener {
         leaveJoinGroupButton.addActionListener(e -> {
             if (plugin.getUser().getGroupId() == null) {
                 try {
-                    plugin.getUser().joinGroup(textFieldJoinParty.getText());
+					if(textFieldJoinParty.getText().trim().length() > 0)
+					{
+						plugin.getUser().joinGroup(textFieldJoinParty.getText());
+					}
                 } catch (UnsupportedEncodingException ex) {
                     plugin.sendPrivateMessage("Could not join group. Was that a valid ID?");
                 }
@@ -97,7 +100,7 @@ public class PropHuntTwoPanel extends PluginPanel implements ActionListener {
 
         loginLogout.addActionListener(e -> {
             try {
-                if (plugin.getUser().getLoggedIn() == false) {
+                if (!plugin.getUser().getLoggedIn()) {
                     plugin.getUser().login();
                 } else {
                     plugin.getUser().logout();
@@ -150,14 +153,19 @@ public class PropHuntTwoPanel extends PluginPanel implements ActionListener {
 
     public void updateLoginLogoutButton() {
         if (plugin.getUser().getLoggedIn()) {
-            this.loginLogout.setText("Logout");
-        } else {
-            this.loginLogout.setText("Login");
-        }
+			this.loginLogout.setText("Logout");
+			this.textFieldJoinParty.setVisible(true);
+			this.leaveJoinGroupButton.setVisible(true);
+		} else {
+			this.loginLogout.setText("Login");
+			this.textFieldJoinParty.setVisible(false);
+			this.leaveJoinGroupButton.setVisible(false);
+			setGroupTextField(null);
+		}
     }
 
     public void updateLeaveJoinGroupButton() {
-        if (plugin.getUser().getGroupId() != null) {
+		if (plugin.getUser().getGroupId() != null) {
             this.leaveJoinGroupButton.setText("Leave Group");
         } else {
             this.leaveJoinGroupButton.setText("Join Group");

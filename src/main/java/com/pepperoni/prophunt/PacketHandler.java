@@ -35,6 +35,7 @@ public class PacketHandler
 		int offset = 0;
 		byte[] data = packet.getData();
 		byte packetType = data[0];
+		System.out.println("packet recv " + packetType);
 
 		if (packetType < 0 || packetType >= PacketType.values().length)
 		{
@@ -53,13 +54,15 @@ public class PacketHandler
 		}
 		else if (packetType == PacketType.ERROR_MESSAGE.getIndex())
 		{
-			// int dataValue = ByteBuffer.wrap(data, offset + 1, 2).getShort();
+			ByteBuffer buffer = ByteBuffer.wrap(data, offset, packet.getLength() - offset);
+			short dataValue = buffer.getShort();
 			//  if (Errors.Errors[dataValue] != null) {
-			System.out.println("ERROR RECV: "/* + Errors.Errors[dataValue]*/);
-			// }
+			System.out.println("ERROR RECV: " + dataValue);
+			 //}
 		}
 		else if (packetType == PacketType.PLAYER_LIST.getIndex())
 		{
+			System.out.println("received PLAYER_LIST:");
 			HashMap<Short, PropHuntPlayer> players = new HashMap<>();
 			ByteBuffer buffer = ByteBuffer.wrap(data, offset, packet.getLength() - offset);
 
