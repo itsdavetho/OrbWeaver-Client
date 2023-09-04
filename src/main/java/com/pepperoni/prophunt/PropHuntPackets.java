@@ -25,10 +25,7 @@ enum PacketType {
     PLAYER_LIST,
 
     PLAYER_UPDATE, // all update_ packets are sent with player_update
-        UPDATE_PROP,
-        UPDATE_LOCATION,
-        UPDATE_TEAM,
-        UPDATE_STATUS,
+
     PLAYER_LOCATION,
     PLAYER_PROP,
     PLAYER_NOTIFY,
@@ -54,6 +51,33 @@ enum PacketType {
     public int getIndex() {
         return index;
     }
+}
+
+enum PlayerUpdate {
+	UPDATE_PROP,
+	UPDATE_LOCATION,
+	UPDATE_TEAM,
+	UPDATE_STATUS;
+
+	private static final Map<Integer, PlayerUpdate> indexToEnumMap = new HashMap<>();
+
+	static {
+		int index = 0;
+		for (PlayerUpdate playerUpdate : PlayerUpdate.values()) {
+			playerUpdate.index = index++;
+			indexToEnumMap.put(playerUpdate.index, playerUpdate);
+		}
+	}
+
+	private int index;
+
+	public static PlayerUpdate fromIndex(int index) {
+		return indexToEnumMap.get(index);
+	}
+
+	public int getIndex() {
+		return index;
+	}
 }
 
 public class PropHuntPackets {
