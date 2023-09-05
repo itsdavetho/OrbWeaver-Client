@@ -137,7 +137,7 @@ public class PropHuntUser {
 		buffer.putShort((short) loc.getY());
 		buffer.put((byte) loc.getPlane());
 		buffer.putShort((short) 512);
-
+		System.out.println("updating location: " + loc.getX() + " " + loc.getY() + " " + loc.getPlane());
 		byte[] locationData = buffer.array();
 
 		packet.add(locationData);

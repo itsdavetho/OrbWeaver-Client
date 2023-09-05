@@ -93,11 +93,12 @@ public class PacketHandler
 		}
 		else if (packetType == PacketType.PLAYER_UPDATE.getIndex())
 		{
-			short updateType = (short) ((short) data[offset] & 0xFF); // update type 1byte uint8
+			/*short updateType = (short) ((short) data[offset] & 0xFF); // update type 1byte uint8
 			offset++;
 			short userIdToUpdate = (short) ((short) ((data[offset] & 0xFF) << 8) | (data[offset + 1] & 0xFF)); // 2 bytes uint16
 			offset += 2;
-			plugin.updatePlayer(updateType, userIdToUpdate, data, offset);
+			System.out.println("recv update " + updateType + " " + userIdToUpdate);
+			*/plugin.updatePlayer(data);
 
 		}
 		else if (packetType == PacketType.GROUP_INFO.getIndex())

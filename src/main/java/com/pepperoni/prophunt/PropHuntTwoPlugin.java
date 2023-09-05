@@ -3,6 +3,8 @@ package com.pepperoni.prophunt;
 import com.google.inject.Inject;
 import com.google.inject.Provides;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -303,39 +305,43 @@ public class PropHuntTwoPlugin extends Plugin
 	}
 
 	// update the player in the region (location or prop data)
-	public void updatePlayer(short updateType, short userIdToUpdate, byte[] data, int offset)
+	public void updatePlayer(byte[] data)
 	{
-		if (!this.players.containsKey(userIdToUpdate))
+		try
 		{
-			//System.out.println("Attempted to update a player, but they did not exist!");
-			return;
-		}
-		if (updateType < 0 || updateType >= PlayerUpdate.values().length)
-		{
-			System.out.println("invalid update type received: " + userIdToUpdate + " " + updateType + " " + PlayerUpdate.values().length);
-			return;
-		}
-		PropHuntPlayer player = this.players.get(userIdToUpdate);
-		if (updateType == PlayerUpdate.LOCATION.getIndex())
-		{
-			int x = ((data[offset] & 0xFF) << 8) | (data[offset + 1] & 0xFF); // read the x coordinate as an unsigned short
-			offset += 2;
-			int y = ((data[offset] & 0xFF) << 8) | (data[offset + 1] & 0xFF); // read the y coordinate as an unsigned short
-			offset += 2;
-			int z = Byte.toUnsignedInt(data[offset]); // read the z coordinate as an unsigned byte
-			offset++;
-			int orientation = ((data[offset] & 0xFF) << 8) | (data[offset + 1] & 0xFF); // read the orientation as an unsigned short
-			offset += 2;
+			ByteArrayInputStream inputStream = new ByteArrayInputStream(data);
+			DataInputStream dataInputStream = new DataInputStream(inputStream);
+			dataInputStream.skipBytes(1); // skip the opcode byte
 
-			player.setLocation(x, y, z);
-			player.setOrientation((short) orientation);
+			int updateType = dataInputStream.readUnsignedByte();
+			short userIdToUpdate = (short) dataInputStream.readUnsignedShort();
+
+			if (!this.players.containsKey(userIdToUpdate))
+			{
+				//System.out.println("Attempted to update a player, but they did not exist!");
+				return;
+			}
+			if (updateType < 0 || updateType >= PlayerUpdate.values().length)
+			{
+				System.out.println("invalid update type received: " + userIdToUpdate + " " + updateType + " " + PlayerUpdate.values().length);
+				return;
+			}
+			PropHuntPlayer player = this.players.get(userIdToUpdate);
+
+			if (updateType == PlayerUpdate.LOCATION.getIndex())
+			{
+				int x = dataInputStream.readUnsignedShort();
+				int y = dataInputStream.readUnsignedShort();
+				int z = dataInputStream.readUnsignedByte();
+				int orientation = dataInputStream.readUnsignedShort();
+			}
+			dataInputStream.close();
+			inputStream.close();
 		}
-		else if (updateType == PlayerUpdate.PROP.getIndex())
+		catch (Exception e)
 		{
-			/*
-			short propId = 0;
-			byte propType = 0;
-			player.setProp(propId, propType);*/
+
+			e.printStackTrace();
 		}
 	}
 }

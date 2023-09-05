@@ -17,11 +17,12 @@ enum PacketType
 	GROUP_NEW,
 	GROUP_JOIN,
 	GROUP_LEAVE,
-	GROUP_USERS,
 	GROUP_INFO,
+
 	GROUP_START_GAME,
 	GROUP_END_GAME,
 	GROUP_SET_STAGE,
+
 	PLAYER_LIST,
 	PLAYER_UPDATE, // PLAYER_UPDATE opcode is followed by PlayerUpdate type found below
 
