@@ -94,7 +94,7 @@ public class PropHuntTwoPlugin extends Plugin
 		overlayManager.remove(overlay);
 		panel = null;
 		clientToolbar.removeNavigation(navButton);
-		getUser().setLocation(null);
+		getUser().setLocation(null, client.getLocalPlayer().getOrientation());
 		getUser().setUsername(null);
 		user.setJWT(null);
 		user.setGroupId(null);
@@ -112,11 +112,12 @@ public class PropHuntTwoPlugin extends Plugin
 			{
 				if (getUser().getLastLocation() != null && !getUser().getLastLocation().equals(client.getLocalPlayer().getWorldLocation()))
 				{
-					getUser().setLocation(client.getLocalPlayer().getWorldLocation());
+					getUser().setLocation(client.getLocalPlayer().getWorldLocation(), client.getLocalPlayer().getOrientation());
 				}
 				else if (getUser().getLastLocation() == null)
 				{
-					getUser().setLocation(client.getLocalPlayer().getWorldLocation());
+
+					getUser().setLocation(client.getLocalPlayer().getWorldLocation(), client.getLocalPlayer().getOrientation());
 				}
 			}
 
