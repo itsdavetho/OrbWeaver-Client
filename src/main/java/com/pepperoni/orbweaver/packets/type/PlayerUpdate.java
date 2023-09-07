@@ -3,7 +3,7 @@ package com.pepperoni.orbweaver.packets.type;
 import com.pepperoni.orbweaver.OrbWeaverPlugin;
 import com.pepperoni.orbweaver.packets.Packet;
 import com.pepperoni.orbweaver.packets.PlayerUpdateType;
-import com.pepperoni.orbweaver.players.Player;
+import com.pepperoni.orbweaver.players.OrbWeaverPlayer;
 import java.io.DataInputStream;
 import java.io.IOException;
 
@@ -33,7 +33,7 @@ public class PlayerUpdate extends Packet
 			System.out.println("invalid update type received: " + userIdToUpdate + " " + updateType + " " + PlayerUpdateType.values().length);
 			return;
 		}
-		Player player = plugin.getPlayers().get(userIdToUpdate);
+		OrbWeaverPlayer orbWeaverPlayer = plugin.getPlayers().get(userIdToUpdate);
 
 		if (updateType == PlayerUpdateType.LOCATION.getIndex())
 		{
@@ -42,8 +42,8 @@ public class PlayerUpdate extends Packet
 			int z = data.readUnsignedByte();
 			short orientation = (short) data.readUnsignedShort();
 
-			player.setLocation(x, y, z);
-			player.setOrientation(orientation);
+			orbWeaverPlayer.setLocation(x, y, z);
+			orbWeaverPlayer.setOrientation(orientation);
 		}
 	}
 }

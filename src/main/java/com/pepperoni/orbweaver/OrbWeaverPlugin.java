@@ -2,9 +2,8 @@ package com.pepperoni.orbweaver;
 
 import com.google.inject.Inject;
 import com.google.inject.Provides;
-import com.pepperoni.orbweaver.objects.Objects;
 import com.pepperoni.orbweaver.packets.PacketHandler;
-import com.pepperoni.orbweaver.players.Player;
+import com.pepperoni.orbweaver.players.OrbWeaverPlayer;
 import com.pepperoni.orbweaver.players.User;
 import com.pepperoni.orbweaver.ui.Overlay;
 import com.pepperoni.orbweaver.ui.Panel;
@@ -16,15 +15,28 @@ import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.swing.SwingUtilities;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
+import net.runelite.api.DecorativeObject;
+import net.runelite.api.GameObject;
 import net.runelite.api.GameState;
+import net.runelite.api.GroundObject;
+import net.runelite.api.Model;
+import net.runelite.api.Player;
+import net.runelite.api.Renderable;
+import net.runelite.api.Tile;
+import net.runelite.api.TileItem;
+import net.runelite.api.WallObject;
 import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
+import net.runelite.api.events.MenuEntryAdded;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.chat.ChatCommandManager;
 import net.runelite.client.config.ConfigManager;
@@ -38,47 +50,78 @@ import net.runelite.client.util.ImageUtil;
 
 @Slf4j
 @PluginDescriptor(
-	name = "OrbWeaver"
+	name = "OrbWeaver",
+	description = "Connect your creative minds",
+	tags = {"multiplayer", "creative"}
+
 )
 public class OrbWeaverPlugin extends Plugin
 {
-
-//	private final OrbWeaverPackets packets;
-
-	private final User user;
-
-	private final PacketHandler packetHandler;
-	public Objects objects;
+	@Getter
 	@Inject
 	private Client client;
 
+	@Getter
+	private final User user;
+
+	@Getter
 	@Inject
 	private ClientThread clientThread;
+
+	@Getter
 	@Inject
 	private Config config;
+
 	@Inject
 	private OverlayManager overlayManager;
+
+	@Getter
 	@Inject
 	private Overlay overlay;
 
 	@Inject
-	private ChatCommandManager commandManager;
-
-	@Inject
 	private ClientToolbar clientToolbar;
+
+	@Getter
 	private Panel panel;
 	private NavigationButton navButton;
+
+	@Inject
+	private ChatCommandManager commandManager;
+
+	@Getter
 	private DatagramSocket socket;
+	@Getter
+	@Setter
 	private InetAddress serverAddress;
+	@Getter
+	@Setter
 	private int serverPort;
-	//private int clientPort;
-	private Map<Short, Player> players = new HashMap<>();
-	private int playersOnline = 0, maxPlayers = 0;
-	private String serverTitle = "OrbWeaver server";
+	@Getter
+	private final PacketHandler packetHandler;
+
+	@Getter
+	@Setter
+	private Map<Short, OrbWeaverPlayer> players = new HashMap<>();
+
+	@Getter
+	@Setter
+	private String serverTitle = "OrbWeaver";
+
+	@Getter
+	@Setter
+	private int playersOnline = 0;
+
+	@Getter
+	@Setter
+	private int maxPlayers = 0;
+
+
+	@Getter
+	public OrbModelManager modelManager;
 
 	public OrbWeaverPlugin()
 	{
-		//packets = new OrbWeaverPackets(this);
 		user = new User(this, client);
 		packetHandler = new PacketHandler(this);
 	}
@@ -101,12 +144,11 @@ public class OrbWeaverPlugin extends Plugin
 		overlayManager.remove(overlay);
 		panel = null;
 		clientToolbar.removeNavigation(navButton);
-		getUser().setLocation(null, client.getLocalPlayer().getOrientation());
+		getUser().setLocation(null, -1);
 		getUser().setUsername(null);
 		user.setJWT(null);
 		user.setGroupId(null);
 		user.setLoggedIn(false);
-		// socket.close();
 		log.info("OrbWeaver stopped!");
 	}
 
@@ -150,12 +192,94 @@ public class OrbWeaverPlugin extends Plugin
 		}
 	}
 
+	@Subscribe
+	public void onMenuEntryAdded(MenuEntryAdded event)
+	{
+		String target = event.getTarget();
+		String option = event.getOption();
+		Tile tile = client.getSelectedSceneTile();
+		if (tile != null)
+		{
+			if (option.equals("Walk here"))
+			{
+				// get all game objects on this tile
+				GameObject[] gameObjects = tile.getGameObjects();
+				for (GameObject gameObject : gameObjects)
+				{
+					if (gameObject == null)
+					{
+						continue;
+					}
+					Renderable renderable = gameObject.getRenderable();
+					if (renderable == null)
+					{
+						continue;
+					}
+					if (renderable instanceof Model)
+					{
+						Model model = (Model) renderable;
+					}
+				}
+
+				// get any ground object on this tile
+				GroundObject groundObject = tile.getGroundObject();
+				if (groundObject != null)
+				{
+					Renderable renderable = groundObject.getRenderable();
+					if (renderable instanceof Model)
+					{
+						Model model = (Model) groundObject.getRenderable();
+					}
+				}
+
+				// get any decorativeobject on this tile
+				DecorativeObject decorativeObject = tile.getDecorativeObject();
+				if (decorativeObject != null)
+				{
+					Renderable renderable = decorativeObject.getRenderable();
+					if (renderable instanceof Model)
+					{
+						Model model = (Model) decorativeObject.getRenderable();
+					}
+				}
+
+				// get any wallobject on this tile
+				WallObject wallObject = tile.getWallObject();
+				if (wallObject != null)
+				{
+					Renderable renderable = wallObject.getRenderable1();
+					if (renderable instanceof Model)
+					{
+						Model model = (Model) renderable;
+					}
+				}
+
+				List<TileItem> tileItems = tile.getGroundItems();
+			}
+		}
+
+		// get any player on this tile
+		Player player = event.getMenuEntry().getPlayer();
+		if (player != null && option.equals("Trade with"))
+		{
+
+		}
+
+		// get the local player (You) on this tile
+		Player localPlayer = client.getLocalPlayer();
+		if (localPlayer != null && tile != null && option.equals("Walk here"))
+		{
+			if (tile.getLocalLocation().equals(localPlayer.getLocalLocation()))
+			{
+
+			}
+		}
+	}
+
 	private void reloadPanel(ChatMessage chatMessage, String s)
 	{
 		panel = null;
 		clientToolbar.removeNavigation(navButton);
-		System.out.println("reloading panel");
-
 		SwingUtilities.invokeLater(new Runnable()
 		{
 			public void run()
@@ -176,11 +300,6 @@ public class OrbWeaverPlugin extends Plugin
 			.panel(panel)
 			.build();
 		clientToolbar.addNavigation(navButton);
-	}
-
-	public Panel getPanel()
-	{
-		return panel;
 	}
 
 	private void startMessageHandlerThread()
@@ -240,7 +359,7 @@ public class OrbWeaverPlugin extends Plugin
 					if (serverAddress instanceof Inet4Address)
 					{
 						String serverString = serverAddress.getHostName() + ":" + serverPort;
-						sendPrivateMessage("Connecting (" + serverString + ")...");
+						// sendPrivateMessage("Connecting (" + serverString + ")...");
 						startMessageHandlerThread();
 					}
 					else
@@ -260,31 +379,6 @@ public class OrbWeaverPlugin extends Plugin
 		}
 	}
 
-	public DatagramSocket getSocket()
-	{
-		return socket;
-	}
-
-	public PacketHandler getPacketHandler()
-	{
-		return this.packetHandler;
-	}
-
-	public InetAddress getServerAddress()
-	{
-		return serverAddress;
-	}
-
-	public int getServerPort()
-	{
-		return serverPort;
-	}
-
-	public User getUser()
-	{
-		return this.user;
-	}
-
 	@Provides
 	Config provideConfig(ConfigManager configManager)
 	{
@@ -294,55 +388,5 @@ public class OrbWeaverPlugin extends Plugin
 	public void sendPrivateMessage(String message)
 	{
 		clientThread.invokeLater(() -> client.addChatMessage(ChatMessageType.PRIVATECHAT, "OrbWeaver", message, "OrbWeaver"));
-	}
-
-	public Config getConfig()
-	{
-		return this.config;
-	}
-
-	public ClientThread getClientThread()
-	{
-		return clientThread;
-	}
-
-	// update the list of local players (in the region)
-	public void updatePlayers(HashMap<Short, Player> orbWeaverPlayers)
-	{
-		this.players = orbWeaverPlayers;
-	}
-
-	public Map<Short, Player> getPlayers()
-	{
-		return this.players;
-	}
-
-	public void setServerTitle(String serverTitle)
-	{
-		if(serverTitle.length() > 32) {
-			serverTitle = serverTitle.substring(0, 32);
-		}
-		this.serverTitle = serverTitle;
-	}
-
-	public String getServerTitle()
-	{
-		return this.serverTitle;
-	}
-
-	public void setPlayersOnline(int playersOnline, int maxPlayers)
-	{
-		this.playersOnline = playersOnline;
-		this.maxPlayers = maxPlayers;
-	}
-
-	public int getPlayersOnline()
-	{
-		return this.playersOnline;
-	}
-
-	public int getMaxPlayers()
-	{
-		return this.maxPlayers;
 	}
 }

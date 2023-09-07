@@ -16,7 +16,8 @@ public class LoggedOut extends Packet
 	{
 		plugin.getUser().setLoggedIn(false);
 		plugin.setServerTitle("OrbWeaver");
-		plugin.setPlayersOnline(0, 0);
+		plugin.setPlayersOnline(0);
+		plugin.setMaxPlayers(0);
 		plugin.getUser().setJWT(null);
 		plugin.getUser().setGroupId(null);
 	}

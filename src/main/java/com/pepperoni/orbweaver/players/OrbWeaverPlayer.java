@@ -2,7 +2,7 @@ package com.pepperoni.orbweaver.players;
 
 import net.runelite.api.coords.WorldPoint;
 
-public class Player
+public class OrbWeaverPlayer
 {
 	private short modelId;
 	private byte modelType;
@@ -12,7 +12,7 @@ public class Player
 	private byte status;
 	private final String username;
 
-	public Player(String username)
+	public OrbWeaverPlayer(String username)
 	{
 		this.username = username;
 	}

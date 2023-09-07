@@ -26,7 +26,8 @@ public class ServerInfo extends Packet
 		String serverTitle = new String(serverTitleData, StandardCharsets.UTF_8);
 
 		System.out.println("server info received: " + serverTitle);
-		plugin.setPlayersOnline(playersOnline, maxPlayers);
+		plugin.setPlayersOnline(playersOnline);
+		plugin.setMaxPlayers(maxPlayers);
 		plugin.setServerTitle(serverTitle);
 	}
 }

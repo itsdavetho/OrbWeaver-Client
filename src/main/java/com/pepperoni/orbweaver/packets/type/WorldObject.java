@@ -4,6 +4,7 @@ import com.pepperoni.orbweaver.OrbWeaverPlugin;
 import com.pepperoni.orbweaver.packets.Packet;
 import java.io.DataInputStream;
 import java.io.IOException;
+import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.coords.WorldPoint;
 
 public class WorldObject extends Packet
@@ -18,17 +19,18 @@ public class WorldObject extends Packet
 	{
 		DataInputStream data = this.getData();
 		boolean addObject = data.readUnsignedByte() == 0;
-		int objectStorageId = data.readUnsignedByte();
+		int modelStorageId = data.readUnsignedByte();
 		if(addObject) {
+			int modelId = data.readUnsignedByte();
 			int x = data.readUnsignedByte();
 			int y = data.readUnsignedByte();
-			int z = data.readUnsignedByte();
-			WorldPoint location = new WorldPoint(x, y, z);
-			int modelId = data.readUnsignedByte();
+			LocalPoint location = new LocalPoint(x, y);
+			int plane = data.readUnsignedByte();
 			int orientation = data.readUnsignedByte();
-			plugin.objects.addObject(objectStorageId, modelId, location, orientation);
+			int animationId = data.readUnsignedByte();
+			plugin.modelManager.addModel(modelStorageId, modelId, location, plane, orientation, animationId);
 		} else {
-			plugin.objects.removeObject(objectStorageId);
+			plugin.modelManager.removeObject(modelStorageId);
 		}
 	}
 }
