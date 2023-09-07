@@ -18,11 +18,12 @@ public class UserGetJWT extends Packet
 	{
 		DataInputStream data = this.getData();
 		int size = data.readUnsignedByte();
+		System.out.println("jwt size: " + size);
 		byte[] jwtData = new byte[size];
 		data.readFully(jwtData);
 
 		String jwt = new String(jwtData, StandardCharsets.UTF_8);
-
+		System.out.println("jwt: " + jwt);
 		plugin.getUser().setJWT(jwt);
 		plugin.getUser().setLoggedIn(true);
 

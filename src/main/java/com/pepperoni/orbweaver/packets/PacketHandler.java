@@ -1,19 +1,10 @@
 package com.pepperoni.orbweaver.packets;
 
 import com.pepperoni.orbweaver.OrbWeaverPlugin;
-import com.pepperoni.orbweaver.packets.type.ErrorMessage;
-import com.pepperoni.orbweaver.packets.type.GroupInfo;
-import com.pepperoni.orbweaver.packets.type.GroupLeave;
-import com.pepperoni.orbweaver.packets.type.PlayerList;
-import com.pepperoni.orbweaver.packets.type.PlayerUpdate;
-import com.pepperoni.orbweaver.packets.type.UserGetJWT;
-import com.pepperoni.orbweaver.players.Player;
 import java.io.IOException;
 import java.net.DatagramPacket;
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 
@@ -53,18 +44,26 @@ public class PacketHandler
 		PacketType packetType = PacketType.fromIndex(opCode);
 		Class<? extends Packet> packetHandlerClass = PacketRegistry.getHandler(packetType);
 
-		if (packetHandlerClass != null) {
-			try {
+		if (packetHandlerClass != null)
+		{
+			try
+			{
+				System.out.println("trying to invoke packet " + packetType);
 				Packet packetHandler = packetHandlerClass.getConstructor(byte[].class).newInstance(data);
 				packetHandler.process(plugin);
-			} catch (Exception e) {
+			}
+			catch (Exception e)
+			{
 				e.printStackTrace();
 			}
-		} else {
+		}
+		else
+		{
 			System.out.println("Invalid op code received: " + opCode);
 		}
 	}
 
+	// creates a new buffer with: opCode tokenSize token. for use with PacketHandler.sendPacket
 	public List<byte[]> createPacket(PacketType packet, String token)
 	{
 		List<byte[]> packetList = new ArrayList<>();
@@ -86,6 +85,7 @@ public class PacketHandler
 
 		return packetList;
 	}
+
 	public void sendPacket(List<byte[]> packet)
 	{
 		try

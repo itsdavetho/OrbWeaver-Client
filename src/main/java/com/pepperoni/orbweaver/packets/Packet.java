@@ -23,7 +23,6 @@ public abstract class Packet
 		this.inputStream = new ByteArrayInputStream(data);
 		this.dataInputStream = new DataInputStream(inputStream);
 		byte opCode = (byte) dataInputStream.readUnsignedByte();
-		dataInputStream.skipBytes(1); // skip the op code in the data input stream
 		this.setOpCode(opCode);
 	}
 
