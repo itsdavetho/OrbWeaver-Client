@@ -1,4 +1,4 @@
-package com.pepperoni.orbweaver.Util;
+package com.pepperoni.orbweaver.util;
 
 import java.security.SecureRandom;
 

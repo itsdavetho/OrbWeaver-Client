@@ -2,15 +2,12 @@ package com.pepperoni.orbweaver;
 
 import com.google.inject.Inject;
 import com.google.inject.Provides;
-import com.pepperoni.orbweaver.Packets.OrbWeaverPacketHandler;
-import com.pepperoni.orbweaver.Packets.OrbWeaverPlayerUpdateType;
-import com.pepperoni.orbweaver.Players.OrbWeaverPlayer;
-import com.pepperoni.orbweaver.Players.OrbWeaverUser;
-import com.pepperoni.orbweaver.UI.OrbWeaverOverlay;
-import com.pepperoni.orbweaver.UI.OrbWeaverPanel;
+import com.pepperoni.orbweaver.packets.PacketHandler;
+import com.pepperoni.orbweaver.players.Player;
+import com.pepperoni.orbweaver.players.User;
+import com.pepperoni.orbweaver.ui.Overlay;
+import com.pepperoni.orbweaver.ui.Panel;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -40,16 +37,16 @@ import net.runelite.client.util.ImageUtil;
 
 @Slf4j
 @PluginDescriptor(
-	name = "Prop Hunt Two"
+	name = "OrbWeaver"
 )
 public class OrbWeaverPlugin extends Plugin
 {
 
 //	private final OrbWeaverPackets packets;
 
-	private final OrbWeaverUser user;
+	private final User user;
 
-	private final OrbWeaverPacketHandler orbWeaverPacketHandler;
+	private final PacketHandler packetHandler;
 	@Inject
 	private Client client;
 
@@ -60,26 +57,26 @@ public class OrbWeaverPlugin extends Plugin
 	@Inject
 	private OverlayManager overlayManager;
 	@Inject
-	private OrbWeaverOverlay orbWeaverOverlay;
+	private Overlay overlay;
 
 	@Inject
 	private ChatCommandManager commandManager;
 
 	@Inject
 	private ClientToolbar clientToolbar;
-	private OrbWeaverPanel orbWeaverPanel;
+	private Panel panel;
 	private NavigationButton navButton;
 	private DatagramSocket socket;
 	private InetAddress serverAddress;
 	private int serverPort;
 	//private int clientPort;
-	private Map<Short, OrbWeaverPlayer> players = new HashMap<>();
+	private Map<Short, Player> players = new HashMap<>();
 
 	public OrbWeaverPlugin()
 	{
 		//packets = new OrbWeaverPackets(this);
-		user = new OrbWeaverUser(this, client);
-		orbWeaverPacketHandler = new OrbWeaverPacketHandler(this);
+		user = new User(this, client);
+		packetHandler = new PacketHandler(this);
 	}
 
 	@Override
@@ -87,9 +84,9 @@ public class OrbWeaverPlugin extends Plugin
 	{
 		commandManager.registerCommandAsync("!panel", this::reloadPanel);
 		configureServer();
-		overlayManager.add(orbWeaverOverlay);
+		overlayManager.add(overlay);
 		loadPanel();
-		log.info("Prop Hunt Two started!");
+		log.info("OrbWeaver started!");
 	}
 
 	@Override
@@ -97,8 +94,8 @@ public class OrbWeaverPlugin extends Plugin
 	{
 		commandManager.unregisterCommand("!panel");
 		user.logout();
-		overlayManager.remove(orbWeaverOverlay);
-		orbWeaverPanel = null;
+		overlayManager.remove(overlay);
+		panel = null;
 		clientToolbar.removeNavigation(navButton);
 		getUser().setLocation(null, client.getLocalPlayer().getOrientation());
 		getUser().setUsername(null);
@@ -106,7 +103,7 @@ public class OrbWeaverPlugin extends Plugin
 		user.setGroupId(null);
 		user.setLoggedIn(false);
 		// socket.close();
-		log.info("Prop Hunt Two stopped!");
+		log.info("OrbWeaver stopped!");
 	}
 
 	@Subscribe
@@ -151,7 +148,7 @@ public class OrbWeaverPlugin extends Plugin
 
 	private void reloadPanel(ChatMessage chatMessage, String s)
 	{
-		orbWeaverPanel = null;
+		panel = null;
 		clientToolbar.removeNavigation(navButton);
 		System.out.println("reloading panel");
 
@@ -166,20 +163,20 @@ public class OrbWeaverPlugin extends Plugin
 
 	private void loadPanel()
 	{
-		orbWeaverPanel = new OrbWeaverPanel(this, client);
+		panel = new Panel(this, client);
 		final BufferedImage icon = ImageUtil.loadImageResource(getClass(), "panel_icon.png");
 		navButton = NavigationButton.builder()
-			.tooltip("Prop Hunt")
+			.tooltip("OrbWeaver")
 			.priority(5)
 			.icon(icon)
-			.panel(orbWeaverPanel)
+			.panel(panel)
 			.build();
 		clientToolbar.addNavigation(navButton);
 	}
 
-	public OrbWeaverPanel getPanel()
+	public Panel getPanel()
 	{
-		return orbWeaverPanel;
+		return panel;
 	}
 
 	private void startMessageHandlerThread()
@@ -198,7 +195,7 @@ public class OrbWeaverPlugin extends Plugin
 			try
 			{
 				socket.receive(packet); // This call blocks until a packet is received
-				orbWeaverPacketHandler.handlePacket(packet);
+				packetHandler.handlePacket(packet);
 			}
 			catch (IOException e)
 			{
@@ -264,9 +261,9 @@ public class OrbWeaverPlugin extends Plugin
 		return socket;
 	}
 
-	public OrbWeaverPacketHandler getPacketHandler()
+	public PacketHandler getPacketHandler()
 	{
-		return this.orbWeaverPacketHandler;
+		return this.packetHandler;
 	}
 
 	public InetAddress getServerAddress()
@@ -279,7 +276,7 @@ public class OrbWeaverPlugin extends Plugin
 		return serverPort;
 	}
 
-	public OrbWeaverUser getUser()
+	public User getUser()
 	{
 		return this.user;
 	}
@@ -292,7 +289,7 @@ public class OrbWeaverPlugin extends Plugin
 
 	public void sendPrivateMessage(String message)
 	{
-		clientThread.invokeLater(() -> client.addChatMessage(ChatMessageType.PRIVATECHAT, "Prop Hunt", message, "Prop Hunt"));
+		clientThread.invokeLater(() -> client.addChatMessage(ChatMessageType.PRIVATECHAT, "OrbWeaver", message, "OrbWeaver"));
 	}
 
 	public Config getConfig()
@@ -306,49 +303,13 @@ public class OrbWeaverPlugin extends Plugin
 	}
 
 	// update the list of local players (in the region)
-	public void updatePlayers(HashMap<Short, OrbWeaverPlayer> propHuntPlayers)
+	public void updatePlayers(HashMap<Short, Player> orbWeaverPlayers)
 	{
-		this.players = propHuntPlayers;
+		this.players = orbWeaverPlayers;
 	}
 
-	// update the player in the region (location or prop data)
-	public void updatePlayer(byte[] data)
+	public Map<Short, Player> getPlayers()
 	{
-		try
-		{
-			ByteArrayInputStream inputStream = new ByteArrayInputStream(data);
-			DataInputStream dataInputStream = new DataInputStream(inputStream);
-			dataInputStream.skipBytes(1); // skip the opcode byte
-
-			int updateType = dataInputStream.readUnsignedByte();
-			short userIdToUpdate = (short) dataInputStream.readUnsignedShort();
-
-			if (!this.players.containsKey(userIdToUpdate))
-			{
-				//System.out.println("Attempted to update a player, but they did not exist!");
-				return;
-			}
-			if (updateType < 0 || updateType >= OrbWeaverPlayerUpdateType.values().length)
-			{
-				System.out.println("invalid update type received: " + userIdToUpdate + " " + updateType + " " + OrbWeaverPlayerUpdateType.values().length);
-				return;
-			}
-			OrbWeaverPlayer orbWeaverPlayer = this.players.get(userIdToUpdate);
-
-			if (updateType == OrbWeaverPlayerUpdateType.LOCATION.getIndex())
-			{
-				int x = dataInputStream.readUnsignedShort();
-				int y = dataInputStream.readUnsignedShort();
-				int z = dataInputStream.readUnsignedByte();
-				int orientation = dataInputStream.readUnsignedShort();
-			}
-			dataInputStream.close();
-			inputStream.close();
-		}
-		catch (Exception e)
-		{
-
-			e.printStackTrace();
-		}
+		return this.players;
 	}
 }

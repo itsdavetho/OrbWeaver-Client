@@ -1,4 +1,4 @@
-package com.pepperoni.orbweaver.UI;
+package com.pepperoni.orbweaver.ui;
 
 import com.pepperoni.orbweaver.OrbWeaverPlugin;
 import net.runelite.api.Client;
@@ -16,7 +16,7 @@ import java.awt.event.*;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
-public class OrbWeaverPanel extends PluginPanel implements ActionListener {
+public class Panel extends PluginPanel implements ActionListener {
     private final OrbWeaverPlugin plugin;
     private final JLabel currentPartyLabel = new JLabel("Not in a group", SwingConstants.CENTER);
     private final JLabel messageLabel = new JLabel();
@@ -26,7 +26,7 @@ public class OrbWeaverPanel extends PluginPanel implements ActionListener {
     private final JButton loginLogout = new JButton("Login");
     private final Client client;
 
-    public OrbWeaverPanel(OrbWeaverPlugin plugin, Client client) {
+    public Panel(OrbWeaverPlugin plugin, Client client) {
         this.plugin = plugin;
         this.client = client;
         setBackground(ColorScheme.DARK_GRAY_COLOR);

@@ -1,21 +1,21 @@
-package com.pepperoni.orbweaver.Packets;
+package com.pepperoni.orbweaver.packets;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public enum OrbWeaverPlayerUpdateType
+public enum PlayerUpdateType
 {
-	PROP,
+	MODEL,
 	LOCATION,
 	TEAM,
 	STATUS;
 
-	private static final Map<Integer, OrbWeaverPlayerUpdateType> indexToEnumMap = new HashMap<>();
+	private static final Map<Integer, PlayerUpdateType> indexToEnumMap = new HashMap<>();
 
 	static
 	{
 		int index = 0;
-		for (OrbWeaverPlayerUpdateType playerUpdateType : OrbWeaverPlayerUpdateType.values())
+		for (PlayerUpdateType playerUpdateType : PlayerUpdateType.values())
 		{
 			playerUpdateType.index = index++;
 			indexToEnumMap.put(playerUpdateType.index, playerUpdateType);
@@ -24,7 +24,7 @@ public enum OrbWeaverPlayerUpdateType
 
 	private int index;
 
-	public static OrbWeaverPlayerUpdateType fromIndex(int index)
+	public static PlayerUpdateType fromIndex(int index)
 	{
 		return indexToEnumMap.get(index);
 	}

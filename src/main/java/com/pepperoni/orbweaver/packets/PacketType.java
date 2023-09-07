@@ -1,9 +1,9 @@
-package com.pepperoni.orbweaver.Packets;
+package com.pepperoni.orbweaver.packets;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public enum OrbWeaverPacketType
+public enum PacketType
 {
 	USER_LOGIN,
 	USER_GET_JWT,
@@ -26,21 +26,21 @@ public enum OrbWeaverPacketType
 	MASTER_SERVER_LIST, // used to retrieve the list of registered servers
 	SERVER_INFO;        // used to retrieve server info
 
-	private static final Map<Integer, OrbWeaverPacketType> indexToEnumMap = new HashMap<>();
+	private static final Map<Integer, PacketType> indexToEnumMap = new HashMap<>();
 
 	static
 	{
 		int index = 0;
-		for (OrbWeaverPacketType orbWeaverPacketType : OrbWeaverPacketType.values())
+		for (PacketType packetType : PacketType.values())
 		{
-			orbWeaverPacketType.index = index++;
-			indexToEnumMap.put(orbWeaverPacketType.index, orbWeaverPacketType);
+			packetType.index = index++;
+			indexToEnumMap.put(packetType.index, packetType);
 		}
 	}
 
 	private int index;
 
-	public static OrbWeaverPacketType fromIndex(int index)
+	public static PacketType fromIndex(int index)
 	{
 		return indexToEnumMap.get(index);
 	}

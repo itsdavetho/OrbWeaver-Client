@@ -1,4 +1,4 @@
-package com.pepperoni.orbweaver.UI;
+package com.pepperoni.orbweaver.ui;
 
 import com.google.inject.Inject;
 import com.pepperoni.orbweaver.Config;
@@ -11,7 +11,7 @@ import net.runelite.client.ui.overlay.components.TitleComponent;
 
 import java.awt.*;
 
-public class OrbWeaverOverlay extends net.runelite.client.ui.overlay.Overlay
+public class Overlay extends net.runelite.client.ui.overlay.Overlay
 {
     private final PanelComponent panelComponent = new PanelComponent();
     private final Client client;
@@ -20,7 +20,7 @@ public class OrbWeaverOverlay extends net.runelite.client.ui.overlay.Overlay
 	private final String serverTitle = "OrbWeaver server";
 
     @Inject
-    private OrbWeaverOverlay(Client client, Config config, OrbWeaverPlugin plugin) {
+    private Overlay(Client client, Config config, OrbWeaverPlugin plugin) {
         setPosition(OverlayPosition.ABOVE_CHATBOX_RIGHT);
         this.client = client;
         this.config = config;

@@ -1,9 +1,9 @@
-package com.pepperoni.orbweaver.Players;
+package com.pepperoni.orbweaver.players;
 
 
 import com.pepperoni.orbweaver.OrbWeaverPlugin;
-import com.pepperoni.orbweaver.Packets.OrbWeaverPacketType;
-import com.pepperoni.orbweaver.Packets.OrbWeaverPlayerUpdateType;
+import com.pepperoni.orbweaver.packets.PacketType;
+import com.pepperoni.orbweaver.packets.PlayerUpdateType;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
@@ -13,7 +13,7 @@ import java.util.List;
 import net.runelite.api.Client;
 import net.runelite.api.coords.WorldPoint;
 
-public class OrbWeaverUser
+public class User
 {
 	private final OrbWeaverPlugin plugin;
 	private final Client client;
@@ -25,7 +25,7 @@ public class OrbWeaverUser
 	private boolean loggedIn = false;
 	private int world;
 
-	public OrbWeaverUser(OrbWeaverPlugin plugin, Client client)
+	public User(OrbWeaverPlugin plugin, Client client)
 	{
 		this.plugin = plugin;
 		this.client = client;
@@ -40,7 +40,7 @@ public class OrbWeaverUser
 
 		if (playerName != null)
 		{
-			List<byte[]> packet = plugin.getPacketHandler().createPacket(OrbWeaverPacketType.USER_LOGIN, "unauthorized");
+			List<byte[]> packet = plugin.getPacketHandler().createPacket(PacketType.USER_LOGIN, "unauthorized");
 			byte[] username = playerName.getBytes(StandardCharsets.UTF_8);
 			byte[] password = plugin.getConfig().password().getBytes(StandardCharsets.UTF_8);
 			byte[] worldBuffer = new byte[2];
@@ -66,7 +66,7 @@ public class OrbWeaverUser
 	{
 		if (getLoggedIn() && token != null && plugin.getSocket() != null)
 		{
-			List<byte[]> packet = plugin.getPacketHandler().createPacket(OrbWeaverPacketType.USER_LOGOUT, token);
+			List<byte[]> packet = plugin.getPacketHandler().createPacket(PacketType.USER_LOGOUT, token);
 			plugin.getPacketHandler().sendPacket(packet);
 			this.setLoggedIn(false);
 			this.token = null;
@@ -88,7 +88,7 @@ public class OrbWeaverUser
 
 	public void createGroup(String jwt)
 	{
-		List<byte[]> packet = plugin.getPacketHandler().createPacket(OrbWeaverPacketType.GROUP_NEW, jwt);
+		List<byte[]> packet = plugin.getPacketHandler().createPacket(PacketType.GROUP_NEW, jwt);
 		plugin.getPacketHandler().sendPacket(packet);
 	}
 
@@ -108,7 +108,7 @@ public class OrbWeaverUser
 	{
 		if (getLoggedIn() && getJWT() != null && getGroupId() == null)
 		{
-			List<byte[]> packet = plugin.getPacketHandler().createPacket(OrbWeaverPacketType.GROUP_JOIN, getJWT());
+			List<byte[]> packet = plugin.getPacketHandler().createPacket(PacketType.GROUP_JOIN, getJWT());
 			byte[] groupBuffer = groupId.getBytes(StandardCharsets.UTF_8);
 			List<byte[]> bufferList = new ArrayList<>();
 			bufferList.add(new byte[]{(byte) groupBuffer.length});
@@ -127,7 +127,7 @@ public class OrbWeaverUser
 		System.out.println(getLoggedIn() + " " + getJWT());
 		if (getLoggedIn() && getJWT() != null)
 		{
-			List<byte[]> packet = plugin.getPacketHandler().createPacket(OrbWeaverPacketType.GROUP_LEAVE, getJWT());
+			List<byte[]> packet = plugin.getPacketHandler().createPacket(PacketType.GROUP_LEAVE, getJWT());
 			plugin.getPacketHandler().sendPacket(packet);
 		}
 		else
@@ -155,14 +155,14 @@ public class OrbWeaverUser
 	{
 		this.lastLocation = loc;
 
-		List<byte[]> packet = plugin.getPacketHandler().createPacket(OrbWeaverPacketType.PLAYER_UPDATE, getJWT());
+		List<byte[]> packet = plugin.getPacketHandler().createPacket(PacketType.PLAYER_UPDATE, getJWT());
 
 		ByteBuffer buffer = ByteBuffer.allocate(1 + 2 + 2 + 1 + 2);
 		//1 byte for update code,
 		// 2 bytes for x, 2 bytes for y,
 		// 1 byte for z, and 2 bytes for orientation
 
-		buffer.put((byte) OrbWeaverPlayerUpdateType.LOCATION.getIndex());
+		buffer.put((byte) PlayerUpdateType.LOCATION.getIndex());
 		buffer.putShort((short) loc.getX());
 		buffer.putShort((short) loc.getY());
 		buffer.put((byte) loc.getPlane());

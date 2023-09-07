@@ -1,18 +1,18 @@
-package com.pepperoni.orbweaver.Players;
+package com.pepperoni.orbweaver.players;
 
 import net.runelite.api.coords.WorldPoint;
 
-public class OrbWeaverPlayer
+public class Player
 {
-	private short propId;
-	private byte propType;
+	private short modelId;
+	private byte modelType;
 	private short orientation;
 	private WorldPoint location;
 	private byte team;
 	private byte status;
 	private final String username;
 
-	public OrbWeaverPlayer(String username)
+	public Player(String username)
 	{
 		this.username = username;
 	}
@@ -23,20 +23,20 @@ public class OrbWeaverPlayer
 
 	}
 
-	public short getPropId()
+	public short getModelId()
 	{
-		return propId;
+		return modelId;
 	}
 
-	public void setProp(short propId, byte propType)
+	public void setModel(short modelId, byte modelType)
 	{
-		this.propId = propId;
-		this.propType = propType;
+		this.modelId = modelId;
+		this.modelType = modelType;
 	}
 
-	public byte getPropType()
+	public byte getModelType()
 	{
-		return propType;
+		return modelType;
 	}
 
 	public WorldPoint getLocation()
@@ -83,8 +83,8 @@ public class OrbWeaverPlayer
 	public String toString()
 	{
 		return "UserData{" +
-			"propId=" + propId +
-			", propType=" + propType +
+			"modelId=" + modelId +
+			", modelType=" + modelType +
 			", orientation=" + orientation +
 			", team=" + team +
 			", status=" + status +

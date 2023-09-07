@@ -1,6 +1,6 @@
 package com.pepperoni.orbweaver;
 
-import com.pepperoni.orbweaver.Util.RandomStringGenerator;
+import com.pepperoni.orbweaver.util.RandomStringGenerator;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 

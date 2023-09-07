@@ -1,17 +1,18 @@
-package com.pepperoni.orbweaver.Packets;
+package com.pepperoni.orbweaver.packets;
 
+import com.pepperoni.orbweaver.OrbWeaverPlugin;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 
-public abstract class OrbWeaverPacket
+public abstract class Packet
 {
 	private byte opCode = -1;
 	private byte[] data = null;
 	private ByteArrayInputStream inputStream = null;
 	private DataInputStream dataInputStream = null;
 
-	public OrbWeaverPacket(byte[] data) throws IOException
+	public Packet(byte[] data) throws IOException
 	{
 		this.setData(data);
 	}
@@ -26,23 +27,32 @@ public abstract class OrbWeaverPacket
 		this.setOpCode(opCode);
 	}
 
-	public DataInputStream getData() {
+	public DataInputStream getData()
+	{
 		return this.dataInputStream;
 	}
 
-	//public byte[] getData() {
-	//	return this.data;
-	//}
+	// this.dataInputStream is processed here
+	public abstract void process(OrbWeaverPlugin plugin) throws IOException;
 
-	public boolean setOpCode(byte opCode) {
-		if(opCode < 0 || opCode > 65535) {
+	public void close() throws IOException
+	{
+		this.inputStream.close();
+		this.dataInputStream.close();
+	}
+
+	public boolean setOpCode(byte opCode)
+	{
+		if (opCode < 0 || opCode > 65535)
+		{
 			return false;
 		}
 		this.opCode = opCode;
 		return true;
 	}
 
-	public byte getOpCode() {
+	public byte getOpCode()
+	{
 		return this.opCode;
 	}
 }
