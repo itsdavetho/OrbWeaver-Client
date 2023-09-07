@@ -19,6 +19,9 @@ public enum PacketType
 	GROUP_END_GAME,
 	GROUP_SET_STAGE,
 
+	WORLD_OBJECT,
+	WORLD_NPC,
+
 	PLAYER_LIST,
 	PLAYER_UPDATE, // PLAYER_UPDATE opcode is followed by PlayerUpdate type found below
 

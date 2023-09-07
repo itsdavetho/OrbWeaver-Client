@@ -2,6 +2,7 @@ package com.pepperoni.orbweaver;
 
 import com.google.inject.Inject;
 import com.google.inject.Provides;
+import com.pepperoni.orbweaver.objects.Objects;
 import com.pepperoni.orbweaver.packets.PacketHandler;
 import com.pepperoni.orbweaver.players.Player;
 import com.pepperoni.orbweaver.players.User;
@@ -47,6 +48,7 @@ public class OrbWeaverPlugin extends Plugin
 	private final User user;
 
 	private final PacketHandler packetHandler;
+	public Objects objects;
 	@Inject
 	private Client client;
 
