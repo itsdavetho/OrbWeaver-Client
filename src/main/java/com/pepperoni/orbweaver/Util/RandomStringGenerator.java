@@ -1,4 +1,4 @@
-package com.pepperoni.prophunt;
+package com.pepperoni.orbweaver.Util;
 
 import java.security.SecureRandom;
 

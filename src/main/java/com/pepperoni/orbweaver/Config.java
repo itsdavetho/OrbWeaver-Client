@@ -1,11 +1,12 @@
-package com.pepperoni.prophunt;
+package com.pepperoni.orbweaver;
 
-import net.runelite.client.config.Config;
+import com.pepperoni.orbweaver.Util.RandomStringGenerator;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 
-@ConfigGroup("prophunttwo")
-public interface PropHuntTwoConfig extends Config {
+@ConfigGroup("OrbWeaver")
+public interface Config extends net.runelite.client.config.Config
+{
     @ConfigItem(
             keyName = "server",
             name = "Server Address",

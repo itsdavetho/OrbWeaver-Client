@@ -1,8 +1,8 @@
-package com.pepperoni.prophunt;
+package com.pepperoni.orbweaver.Players;
 
 import net.runelite.api.coords.WorldPoint;
 
-public class PropHuntPlayer
+public class OrbWeaverPlayer
 {
 	private short propId;
 	private byte propType;
@@ -12,7 +12,7 @@ public class PropHuntPlayer
 	private byte status;
 	private final String username;
 
-	public PropHuntPlayer(String username)
+	public OrbWeaverPlayer(String username)
 	{
 		this.username = username;
 	}

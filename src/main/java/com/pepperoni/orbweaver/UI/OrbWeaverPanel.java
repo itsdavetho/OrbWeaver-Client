@@ -1,5 +1,6 @@
-package com.pepperoni.prophunt;
+package com.pepperoni.orbweaver.UI;
 
+import com.pepperoni.orbweaver.OrbWeaverPlugin;
 import net.runelite.api.Client;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.FontManager;
@@ -15,8 +16,8 @@ import java.awt.event.*;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
-public class PropHuntTwoPanel extends PluginPanel implements ActionListener {
-    private final PropHuntTwoPlugin plugin;
+public class OrbWeaverPanel extends PluginPanel implements ActionListener {
+    private final OrbWeaverPlugin plugin;
     private final JLabel currentPartyLabel = new JLabel("Not in a group", SwingConstants.CENTER);
     private final JLabel messageLabel = new JLabel();
     private final JLabel copySuccessLabel = new JLabel();
@@ -25,7 +26,7 @@ public class PropHuntTwoPanel extends PluginPanel implements ActionListener {
     private final JButton loginLogout = new JButton("Login");
     private final Client client;
 
-    public PropHuntTwoPanel(PropHuntTwoPlugin plugin, Client client) {
+    public OrbWeaverPanel(OrbWeaverPlugin plugin, Client client) {
         this.plugin = plugin;
         this.client = client;
         setBackground(ColorScheme.DARK_GRAY_COLOR);

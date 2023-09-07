@@ -1,4 +1,4 @@
-package com.pepperoni.prophunt;
+package com.pepperoni.orbweaver.Packets;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
