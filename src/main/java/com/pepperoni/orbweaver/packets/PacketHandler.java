@@ -39,50 +39,29 @@ public class PacketHandler
 		System.out.println("Packet content: " + packetContent);
 	}
 
+	// receives an op code from the data stream, and tries to find a packet in the registry it is associated with, and invokes it if it exists.
 	public void handlePacket(DatagramPacket packet) throws IOException
 	{
 		byte[] data = packet.getData();
-		byte packetType = data[0];
+		byte opCode = data[0];
 
-		if (packetType < 0 || packetType >= PacketType.values().length)
+		if (opCode < 0 || opCode >= PacketType.values().length)
 		{
 			System.out.println("invalid orbweaver packet received");
 			return;
 		}
+		PacketType packetType = PacketType.fromIndex(opCode);
+		Class<? extends Packet> packetHandlerClass = PacketRegistry.getHandler(packetType);
 
-		if (packetType == PacketType.USER_GET_JWT.getIndex())
-		{
-			UserGetJWT getJWT = new UserGetJWT(data);
-			getJWT.process(plugin);
-		}
-		else if (packetType == PacketType.ERROR_MESSAGE.getIndex())
-		{
-			ErrorMessage errorMessage = new ErrorMessage(data);
-			errorMessage.process(plugin);
-		}
-		else if (packetType == PacketType.PLAYER_LIST.getIndex()) // a list of players on the server with an ID attached
-		{
-			PlayerList playerList = new PlayerList(data);
-			playerList.process(plugin);
-		}
-		else if (packetType == PacketType.PLAYER_UPDATE.getIndex()) // update a specific player (e.g. location, chat)
-		{
-			PlayerUpdate playerUpdate = new PlayerUpdate(data);
-			playerUpdate.process(plugin);
-		}
-		else if (packetType == PacketType.GROUP_INFO.getIndex())
-		{
-			GroupInfo groupInfo = new GroupInfo(data);
-			groupInfo.process(plugin);
-		}
-		else if (packetType == PacketType.GROUP_LEAVE.getIndex())
-		{
-			GroupLeave groupLeave = new GroupLeave(data);
-			groupLeave.process(plugin);
-		}
-		else
-		{
-			System.out.println("Unknown OP Code received: " + packetType);
+		if (packetHandlerClass != null) {
+			try {
+				Packet packetHandler = packetHandlerClass.getConstructor(byte[].class).newInstance(data);
+				packetHandler.process(plugin);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		} else {
+			System.out.println("Invalid op code received: " + opCode);
 		}
 	}
 
