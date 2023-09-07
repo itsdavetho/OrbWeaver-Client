@@ -71,6 +71,8 @@ public class OrbWeaverPlugin extends Plugin
 	private int serverPort;
 	//private int clientPort;
 	private Map<Short, Player> players = new HashMap<>();
+	private int playersOnline = 0, maxPlayers = 0;
+	private String serverTitle = "OrbWeaver server";
 
 	public OrbWeaverPlugin()
 	{
@@ -311,5 +313,34 @@ public class OrbWeaverPlugin extends Plugin
 	public Map<Short, Player> getPlayers()
 	{
 		return this.players;
+	}
+
+	public void setServerTitle(String serverTitle)
+	{
+		if(serverTitle.length() > 32) {
+			serverTitle = serverTitle.substring(0, 32);
+		}
+		this.serverTitle = serverTitle;
+	}
+
+	public String getServerTitle()
+	{
+		return this.serverTitle;
+	}
+
+	public void setPlayersOnline(int playersOnline, int maxPlayers)
+	{
+		this.playersOnline = playersOnline;
+		this.maxPlayers = maxPlayers;
+	}
+
+	public int getPlayersOnline()
+	{
+		return this.playersOnline;
+	}
+
+	public int getMaxPlayers()
+	{
+		return this.maxPlayers;
 	}
 }

@@ -8,6 +8,7 @@ public enum PacketType
 	USER_LOGIN,
 	USER_GET_JWT,
 	USER_LOGOUT,
+	LOGGED_OUT,
 
 	GROUP_NEW,
 	GROUP_JOIN,

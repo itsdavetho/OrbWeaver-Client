@@ -42,14 +42,14 @@ public class PacketHandler
 			return;
 		}
 		PacketType packetType = PacketType.fromIndex(opCode);
-		Class<? extends Packet> packetHandlerClass = PacketRegistry.getHandler(packetType);
+		Class<? extends Packet> packetRegistry = PacketRegistry.getHandler(packetType);
 
-		if (packetHandlerClass != null)
+		if (packetRegistry != null)
 		{
 			try
 			{
 				System.out.println("trying to invoke packet " + packetType);
-				Packet packetHandler = packetHandlerClass.getConstructor(byte[].class).newInstance(data);
+				Packet packetHandler = packetRegistry.getConstructor(byte[].class).newInstance(data);
 				packetHandler.process(plugin);
 			}
 			catch (Exception e)
