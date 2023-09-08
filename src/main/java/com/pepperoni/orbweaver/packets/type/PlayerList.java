@@ -20,28 +20,17 @@ public class PlayerList extends Packet
 	{
 		DataInputStream data = this.getData();
 		HashMap<Short, OrbWeaverPlayer> players = new HashMap<>();
-
-		// Read the packet length (2-byte uint16)
 		int length = data.readUnsignedShort();
-
 		while (data.available() > 0)
 		{
-			// Read user ID (2-byte uint16)
 			int userId = data.readUnsignedShort();
-
-			// Read username length (1-byte uint8)
 			int usernameLength = data.readUnsignedByte();
-
-			// Read username (UTF-8)
 			byte[] usernameBytes = new byte[usernameLength];
 			data.readFully(usernameBytes);
 			String username = new String(usernameBytes, StandardCharsets.UTF_8);
-
-			// Process the user data (userId and username)
 			OrbWeaverPlayer orbWeaverPlayer = new OrbWeaverPlayer(username);
 			players.put((short) userId, orbWeaverPlayer);
 		}
-
 		plugin.setPlayers(players);
 	}
 

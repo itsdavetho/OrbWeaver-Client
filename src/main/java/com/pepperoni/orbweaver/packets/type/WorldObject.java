@@ -18,19 +18,23 @@ public class WorldObject extends Packet
 	public void process(OrbWeaverPlugin plugin) throws IOException
 	{
 		DataInputStream data = this.getData();
-		boolean addObject = data.readUnsignedByte() == 0;
-		int modelStorageId = data.readUnsignedByte();
-		if(addObject) {
-			int modelId = data.readUnsignedByte();
-			int x = data.readUnsignedByte();
-			int y = data.readUnsignedByte();
-			LocalPoint location = new LocalPoint(x, y);
-			int plane = data.readUnsignedByte();
-			int orientation = data.readUnsignedByte();
-			int animationId = data.readUnsignedByte();
-			plugin.modelManager.addModel(modelStorageId, modelId, location, plane, orientation, animationId);
-		} else {
-			plugin.modelManager.removeObject(modelStorageId);
+		int modelsReceived = data.readUnsignedShort();
+		System.out.println("received " + modelsReceived + " models");
+
+		for (int i = 0; i < modelsReceived; i++)
+		{
+			int modelStorageId = data.readUnsignedShort();
+			int modelId = data.readUnsignedShort();
+			int locationX = data.readUnsignedShort();
+			int locationY = data.readUnsignedShort();
+			int locationPlane = data.readUnsignedByte();
+			int orientation = data.readUnsignedShort();
+			int animationId = data.readShort(); // Changed to readShort
+
+			// Create a LocalPoint for the object's location
+			System.out.println("new model loaded @ " + locationX + " " + locationY + " " + locationPlane);
+			WorldPoint location = new WorldPoint(locationX, locationY, locationPlane);
+			plugin.getModelManager().addModel(modelStorageId, modelId, location, orientation, animationId);
 		}
 	}
 }

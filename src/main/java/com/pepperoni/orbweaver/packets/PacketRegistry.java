@@ -25,7 +25,7 @@ public class PacketRegistry
 		packetRegistry.put(PacketType.GROUP_INFO, GroupInfo.class);
 		// packetRegistry.put(PacketType.MASTER_SERVER_LIST, MasterServerList.class);
 		packetRegistry.put(PacketType.SERVER_INFO, ServerInfo.class);
-		packetRegistry.put(PacketType.WORLD_OBJECT, WorldObject.class);
+		packetRegistry.put(PacketType.WORLD_MODEL, WorldObject.class);
 
 		// Add more mappings for other PacketType enums as needed
 	}

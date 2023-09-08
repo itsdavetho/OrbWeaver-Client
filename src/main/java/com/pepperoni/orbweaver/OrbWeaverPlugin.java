@@ -21,6 +21,7 @@ import javax.swing.SwingUtilities;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import net.runelite.api.Animation;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.api.DecorativeObject;
@@ -30,10 +31,14 @@ import net.runelite.api.GroundObject;
 import net.runelite.api.Model;
 import net.runelite.api.Player;
 import net.runelite.api.Renderable;
+import net.runelite.api.RuneLiteObject;
 import net.runelite.api.Tile;
 import net.runelite.api.TileItem;
 import net.runelite.api.WallObject;
+import net.runelite.api.coords.LocalPoint;
+import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.ChatMessage;
+import net.runelite.api.events.ClientTick;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.MenuEntryAdded;
@@ -97,7 +102,6 @@ public class OrbWeaverPlugin extends Plugin
 	@Getter
 	@Setter
 	private int serverPort;
-	@Getter
 	private final PacketHandler packetHandler;
 
 	@Getter
@@ -118,6 +122,7 @@ public class OrbWeaverPlugin extends Plugin
 
 
 	@Getter
+	@Inject
 	public OrbModelManager modelManager;
 
 	public OrbWeaverPlugin()
@@ -155,26 +160,45 @@ public class OrbWeaverPlugin extends Plugin
 	@Subscribe
 	public void onGameTick(GameTick tick)
 	{
-		if (client.getLocalPlayer() != null)
+		if (client.getLocalPlayer() == null)
 		{
-			if (client.getLocalPlayer().getWorldLocation() != null)
-			{
-				if (getUser().getLastLocation() != null && !getUser().getLastLocation().equals(client.getLocalPlayer().getWorldLocation()))
-				{
-					getUser().setLocation(client.getLocalPlayer().getWorldLocation(), client.getLocalPlayer().getOrientation());
-				}
-				else if (getUser().getLastLocation() == null)
-				{
+			return;
+		}
 
-					getUser().setLocation(client.getLocalPlayer().getWorldLocation(), client.getLocalPlayer().getOrientation());
-				}
+		if (client.getLocalPlayer().getWorldLocation() != null)
+		{
+			if (getUser().getLastLocation() == null || !getUser().getLastLocation().equals(client.getLocalPlayer().getWorldLocation()))
+			{
+				getUser().setLocation(client.getLocalPlayer().getWorldLocation(), client.getLocalPlayer().getOrientation());
 			}
+		}
 
-			if (getUser().getUsername() == null && client.getLocalPlayer().getName() != null)
+		if (getUser().getUsername() == null)
+		{
+			String playerName = client.getLocalPlayer().getName();
+			getUser().setUsername(playerName);
+			getUser().setWorld(client.getWorld());
+		}
+	}
+
+	@Subscribe
+	public void onClientTick(ClientTick event)
+	{
+		if (client.getGameState() != GameState.LOGGED_IN)
+		{
+			return;
+		}
+		for (Map.Entry<Integer, OrbWeaverModel> model : this.getModelManager().getModels().entrySet())
+		{
+			int modelStorageId = model.getKey();
+			OrbWeaverModel orbWeaverModel = model.getValue();
+			if (!orbWeaverModel.getRuneLiteObject().isActive() && orbWeaverModel.isActive() == false)
 			{
-				String playerName = client.getLocalPlayer().getName();
-				getUser().setUsername(playerName);
-				getUser().setWorld(client.getWorld());
+				clientThread.invoke(() -> {
+					orbWeaverModel.setActive(false);
+					orbWeaverModel.getRuneLiteObject().setActive(true);
+					orbWeaverModel.setActive(true);
+				});
 			}
 		}
 	}
@@ -182,11 +206,10 @@ public class OrbWeaverPlugin extends Plugin
 	@Subscribe
 	public void onGameStateChanged(GameStateChanged event)
 	{
-		if (event.getGameState() == GameState.LOGGED_IN)
+		if (event.getGameState() == GameState.HOPPING)
 		{
-			if (getUser().getUsername() == null && client.getLocalPlayer() != null && client.getLocalPlayer().getName() != null)
+			if (getUser().getWorld() == client.getWorld())
 			{
-				getUser().setUsername(client.getLocalPlayer().getName());
 				getUser().setWorld(client.getWorld());
 			}
 		}
@@ -327,6 +350,11 @@ public class OrbWeaverPlugin extends Plugin
 		}
 	}
 
+	public PacketHandler getPacketHandler()
+	{
+		return packetHandler;
+	}
+
 	public void configureServer()
 	{
 		try
@@ -389,4 +417,5 @@ public class OrbWeaverPlugin extends Plugin
 	{
 		clientThread.invokeLater(() -> client.addChatMessage(ChatMessageType.PRIVATECHAT, "OrbWeaver", message, "OrbWeaver"));
 	}
+
 }

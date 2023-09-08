@@ -10,6 +10,8 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
 import net.runelite.api.Client;
 import net.runelite.api.coords.WorldPoint;
 
@@ -17,12 +19,21 @@ public class User
 {
 	private final OrbWeaverPlugin plugin;
 	private final Client client;
-	private String playerName = null;
-
+	@Getter
+	@Setter
+	private String username = null;
+	@Getter
+	@Setter
 	private WorldPoint lastLocation = null;
-	private String token = null;
+	@Getter
+	@Setter
+	private String JWT = null;
+	@Getter
 	private String groupId = null;
+	@Getter
 	private boolean loggedIn = false;
+	@Getter
+	@Setter
 	private int world;
 
 	public User(OrbWeaverPlugin plugin, Client client)
@@ -38,10 +49,10 @@ public class User
 			plugin.configureServer();
 		}
 
-		if (playerName != null)
+		if (getUsername() != null)
 		{
 			List<byte[]> packet = plugin.getPacketHandler().createPacket(PacketType.USER_LOGIN, "unauthorized");
-			byte[] username = playerName.getBytes(StandardCharsets.UTF_8);
+			byte[] username = getUsername().getBytes(StandardCharsets.UTF_8);
 			byte[] password = plugin.getConfig().password().getBytes(StandardCharsets.UTF_8);
 			byte[] worldBuffer = new byte[2];
 			ByteBuffer.wrap(worldBuffer).putShort((short) this.world);
@@ -64,20 +75,16 @@ public class User
 
 	public void logout()
 	{
-		if (getLoggedIn() && token != null && plugin.getSocket() != null)
+		if (isLoggedIn() && getJWT() != null && plugin.getSocket() != null)
 		{
-			List<byte[]> packet = plugin.getPacketHandler().createPacket(PacketType.USER_LOGOUT, token);
+			List<byte[]> packet = plugin.getPacketHandler().createPacket(PacketType.USER_LOGOUT, getJWT());
 			plugin.getPacketHandler().sendPacket(packet);
 			this.setLoggedIn(false);
-			this.token = null;
+			this.setJWT(null);
 			this.groupId = "";
+			plugin.getModelManager().removeModels();
 			System.out.println("yes");
 		}
-	}
-
-	public boolean getLoggedIn()
-	{
-		return this.loggedIn;
 	}
 
 	public void setLoggedIn(boolean loggedIn)
@@ -92,11 +99,6 @@ public class User
 		plugin.getPacketHandler().sendPacket(packet);
 	}
 
-	public String getGroupId()
-	{
-		return groupId;
-	}
-
 	public void setGroupId(String groupId)
 	{
 		this.groupId = groupId;
@@ -106,7 +108,7 @@ public class User
 
 	public void joinGroup(String groupId) throws UnsupportedEncodingException
 	{
-		if (getLoggedIn() && getJWT() != null && getGroupId() == null)
+		if (isLoggedIn() && getJWT() != null && getGroupId() == null)
 		{
 			List<byte[]> packet = plugin.getPacketHandler().createPacket(PacketType.GROUP_JOIN, getJWT());
 			byte[] groupBuffer = groupId.getBytes(StandardCharsets.UTF_8);
@@ -124,8 +126,8 @@ public class User
 
 	public void leaveGroup()
 	{
-		System.out.println(getLoggedIn() + " " + getJWT());
-		if (getLoggedIn() && getJWT() != null)
+		System.out.println(isLoggedIn() + " " + getJWT());
+		if (isLoggedIn() && getJWT() != null)
 		{
 			List<byte[]> packet = plugin.getPacketHandler().createPacket(PacketType.GROUP_LEAVE, getJWT());
 			plugin.getPacketHandler().sendPacket(packet);
@@ -134,16 +136,6 @@ public class User
 		{
 			plugin.sendPrivateMessage("There was an error while trying to leave the group.");
 		}
-	}
-
-	public String getJWT()
-	{
-		return token;
-	}
-
-	public void setJWT(String token)
-	{
-		this.token = token;
 	}
 
 	public String getGameStatus()
@@ -174,23 +166,4 @@ public class User
 		plugin.getPacketHandler().sendPacket(packet);
 	}
 
-	public WorldPoint getLastLocation()
-	{
-		return this.lastLocation;
-	}
-
-	public String getUsername()
-	{
-		return this.playerName;
-	}
-
-	public void setUsername(String username)
-	{
-		this.playerName = username;
-	}
-
-	public void setWorld(int world)
-	{
-		this.world = world;
-	}
 }

@@ -101,7 +101,7 @@ public class Panel extends PluginPanel implements ActionListener {
 
         loginLogout.addActionListener(e -> {
             try {
-                if (!plugin.getUser().getLoggedIn()) {
+                if (!plugin.getUser().isLoggedIn()) {
                     plugin.getUser().login();
                 } else {
                     plugin.getUser().logout();
@@ -153,7 +153,7 @@ public class Panel extends PluginPanel implements ActionListener {
     }
 
     public void updateLoginLogoutButton() {
-        if (plugin.getUser().getLoggedIn()) {
+        if (plugin.getUser().isLoggedIn()) {
 			this.loginLogout.setText("Logout");
 			this.textFieldJoinParty.setVisible(true);
 			this.leaveJoinGroupButton.setVisible(true);

@@ -15,20 +15,20 @@ public enum PacketType
 	GROUP_LEAVE,
 	GROUP_INFO,
 
-	GROUP_START_GAME,
-	GROUP_END_GAME,
-	GROUP_SET_STAGE,
+	GROUP_START_GAME, // TODO: Start the game
+	GROUP_END_GAME,   // TODO: End the game
+	GROUP_SET_STAGE,  // TODO: Set the play area
 
-	WORLD_OBJECT,
-	WORLD_NPC,
+	WORLD_MODEL, // used in adding/removing objects
 
 	PLAYER_LIST,
 	PLAYER_UPDATE, // PLAYER_UPDATE opcode is followed by PlayerUpdate type found below
 
 	ERROR_MESSAGE,
-	MASTER_SERVER_POLL, // used to register to the master server
-	MASTER_SERVER_LIST, // used to retrieve the list of registered servers
-	SERVER_INFO;        // used to retrieve server info
+
+	MASTER_SERVER_POLL,
+	MASTER_SERVER_LIST,
+	SERVER_INFO;
 
 	private static final Map<Integer, PacketType> indexToEnumMap = new HashMap<>();
 
