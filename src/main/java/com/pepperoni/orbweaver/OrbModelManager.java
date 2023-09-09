@@ -27,6 +27,10 @@ public class OrbModelManager
 		if (!this.models.containsKey(modelStorageId))
 		{
 			plugin.getClientThread().invokeLater(() -> {
+				if (client == null)
+				{
+					return;
+				}
 				try
 				{
 					RuneLiteObject runeLiteObject = client.createRuneLiteObject();
@@ -48,15 +52,10 @@ public class OrbModelManager
 					if (model != null)
 					{
 						LocalPoint localPoint = LocalPoint.fromWorld(client, location);
-						OrbWeaverModel orbWeaverModel = new OrbWeaverModel(modelStorageId, runeLiteObject, model, location, localPoint, orientation, false);
-						this.getModels().put(modelStorageId, orbWeaverModel);
-						this.setModel(orbWeaverModel, model);
-						this.setLocation(orbWeaverModel, location);
-						return;
-					}
-					else
-					{
-						System.out.println("model was null");
+						OrbWeaverModel orbWeaverModel = new OrbWeaverModel(modelStorageId, runeLiteObject, model, location, localPoint, orientation, false, plugin, this);
+						getModels().put(modelStorageId, orbWeaverModel);
+						orbWeaverModel.setModel(model);
+						orbWeaverModel.setLocation(location);
 					}
 				}
 				catch (Exception e)
@@ -66,47 +65,36 @@ public class OrbModelManager
 			});
 			return modelStorageId;
 		}
+		else
+		{
+			OrbWeaverModel orbWeaverModel = this.getModels().get(modelStorageId);
+			plugin.getClientThread().invokeLater(() -> {
+				if (client == null)
+				{
+					return;
+				}
+				Model model = client.loadModel(modelId);
+				if (model != null)
+				{
+					orbWeaverModel.setModel(model);
+					orbWeaverModel.setActive(true);
+					orbWeaverModel.setLocation(location);
+				}
+			});
+		}
 		return -1;
 	}
 
-	// update the location of the runeliteobject
-	private void setLocation(OrbWeaverModel orbWeaverModel, WorldPoint worldPoint)
-	{
-		RuneLiteObject runeLiteObject = orbWeaverModel.getRuneLiteObject();
-		LocalPoint localPoint = LocalPoint.fromWorld(client, worldPoint);
-		plugin.getClientThread().invoke(() -> {
-			runeLiteObject.setActive(false);
-			runeLiteObject.setLocation(localPoint, worldPoint.getPlane());
-			runeLiteObject.setActive(true);
-		});
-	}
-
-	// set the model of a runeliteobject
-	private void setModel(OrbWeaverModel orbWeaverModel, Model model)
-	{
-		RuneLiteObject runeLiteObject = orbWeaverModel.getRuneLiteObject();
-		plugin.getClientThread().invoke(() -> {
-			runeLiteObject.setModel(model);
-		});
-	}
-
-	// remove one model by it's storage id
-	public void removeModel(int objectStorageId)
-	{
-		plugin.getClientThread().invoke(() -> {
-			RuneLiteObject runeLiteObject = getModels().get(objectStorageId).getRuneLiteObject();
-			runeLiteObject.setActive(false);
-		});
-	}
-
-	// remove all models
+	// remove all models and reset the model list
 	public void removeModels()
 	{
 		for (Map.Entry<Integer, OrbWeaverModel> model : getModels().entrySet())
 		{
 			int modelStorageId = model.getKey();
 			OrbWeaverModel orbWeaverModel = model.getValue();
-			removeModel(modelStorageId);
+			orbWeaverModel.removeModel();
 		}
+
+		this.models = new HashMap<Integer, OrbWeaverModel>();
 	}
 }

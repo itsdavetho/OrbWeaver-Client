@@ -3,6 +3,7 @@ package com.pepperoni.orbweaver.packets;
 import com.pepperoni.orbweaver.packets.type.ErrorMessage;
 import com.pepperoni.orbweaver.packets.type.GroupInfo;
 import com.pepperoni.orbweaver.packets.type.GroupLeave;
+import com.pepperoni.orbweaver.packets.type.LoggedOut;
 import com.pepperoni.orbweaver.packets.type.PlayerList;
 import com.pepperoni.orbweaver.packets.type.PlayerUpdate;
 import com.pepperoni.orbweaver.packets.type.ServerInfo;
@@ -26,6 +27,7 @@ public class PacketRegistry
 		// packetRegistry.put(PacketType.MASTER_SERVER_LIST, MasterServerList.class);
 		packetRegistry.put(PacketType.SERVER_INFO, ServerInfo.class);
 		packetRegistry.put(PacketType.WORLD_MODEL, WorldObject.class);
+		packetRegistry.put(PacketType.LOGGED_OUT, LoggedOut.class);
 
 		// Add more mappings for other PacketType enums as needed
 	}

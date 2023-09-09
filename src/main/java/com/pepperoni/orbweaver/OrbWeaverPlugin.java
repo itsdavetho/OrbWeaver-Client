@@ -188,19 +188,6 @@ public class OrbWeaverPlugin extends Plugin
 		{
 			return;
 		}
-		for (Map.Entry<Integer, OrbWeaverModel> model : this.getModelManager().getModels().entrySet())
-		{
-			int modelStorageId = model.getKey();
-			OrbWeaverModel orbWeaverModel = model.getValue();
-			if (!orbWeaverModel.getRuneLiteObject().isActive() && orbWeaverModel.isActive() == false)
-			{
-				clientThread.invoke(() -> {
-					orbWeaverModel.setActive(false);
-					orbWeaverModel.getRuneLiteObject().setActive(true);
-					orbWeaverModel.setActive(true);
-				});
-			}
-		}
 	}
 
 	@Subscribe

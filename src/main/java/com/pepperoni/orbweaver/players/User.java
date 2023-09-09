@@ -83,7 +83,6 @@ public class User
 			this.setJWT(null);
 			this.groupId = "";
 			plugin.getModelManager().removeModels();
-			System.out.println("yes");
 		}
 	}
 
