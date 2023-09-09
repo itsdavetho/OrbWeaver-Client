@@ -58,8 +58,8 @@ public class Overlay extends net.runelite.client.ui.overlay.Overlay
 		panelComponent.getChildren().add(LineComponent.builder()
 			.left("Players:")
 			.right(plugin.getPlayersOnline() + "/" + plugin.getMaxPlayers())
-				.build()
-			);
+			.build()
+		);
 		// Show world type goes here ...
 
 		return panelComponent.render(graphics);
@@ -67,6 +67,14 @@ public class Overlay extends net.runelite.client.ui.overlay.Overlay
 
 	public void setServerTitle(String serverTitle)
 	{
-		serverTitle = serverTitle.substring(0, 32); // no server title should be longer than 32 characters.
+		if (serverTitle != null)
+		{
+			if (serverTitle.length() > 32)
+			{
+				serverTitle = serverTitle.substring(0, 32); // no server title should be longer than 32 characters.
+			}
+		} else {
+			serverTitle = "OrbWeaver";
+		}
 	}
 }

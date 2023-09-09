@@ -3,8 +3,9 @@ package com.pepperoni.orbweaver;
 import com.google.inject.Inject;
 import com.google.inject.Provides;
 import com.pepperoni.orbweaver.packets.IncomingPacketHandler;
-import com.pepperoni.orbweaver.players.OrbWeaverPlayer;
-import com.pepperoni.orbweaver.players.User;
+import com.pepperoni.orbweaver.packets.outgoing.player.OrbChatMessage;
+import com.pepperoni.orbweaver.player.OrbWeaverPlayer;
+import com.pepperoni.orbweaver.player.User;
 import com.pepperoni.orbweaver.ui.Overlay;
 import com.pepperoni.orbweaver.ui.Panel;
 import java.awt.image.BufferedImage;
@@ -59,37 +60,31 @@ import net.runelite.client.util.ImageUtil;
 public class OrbWeaverPlugin extends Plugin
 {
 	@Getter
+	private final User user;
+	@Getter
+	@Inject
+	public OrbModelManager modelManager;
+	@Getter
 	@Inject
 	private Client client;
-
-	@Getter
-	private final User user;
-
 	@Getter
 	@Inject
 	private ClientThread clientThread;
-
 	@Getter
 	@Inject
 	private Config config;
-
 	@Inject
 	private OverlayManager overlayManager;
-
 	@Getter
 	@Inject
 	private Overlay overlay;
-
 	@Inject
 	private ClientToolbar clientToolbar;
-
 	@Getter
 	private Panel panel;
 	private NavigationButton navButton;
-
 	@Inject
 	private ChatCommandManager commandManager;
-
 	@Getter
 	private DatagramSocket socket;
 	@Getter
@@ -98,28 +93,20 @@ public class OrbWeaverPlugin extends Plugin
 	@Getter
 	@Setter
 	private int serverPort;
+	@Getter
 	private final IncomingPacketHandler incomingPacketHandler;
-
 	@Getter
 	@Setter
 	private Map<Short, OrbWeaverPlayer> players = new HashMap<>();
-
 	@Getter
 	@Setter
 	private String serverTitle = "OrbWeaver";
-
 	@Getter
 	@Setter
 	private int playersOnline = 0;
-
 	@Getter
 	@Setter
 	private int maxPlayers = 0;
-
-
-	@Getter
-	@Inject
-	public OrbModelManager modelManager;
 
 	public OrbWeaverPlugin()
 	{
@@ -131,10 +118,29 @@ public class OrbWeaverPlugin extends Plugin
 	protected void startUp()
 	{
 		commandManager.registerCommandAsync("!panel", this::reloadPanel);
+		commandManager.registerCommandAsync("!o", this::orbChatMessage);
 		configureServer();
 		overlayManager.add(overlay);
 		loadPanel();
 		log.info("OrbWeaver started!");
+		getPanel().update();
+	}
+
+	private void orbChatMessage(ChatMessage chatMessage, String s)
+	{
+		try
+		{
+			if (getUser().isLoggedIn())
+			{
+				String msg = chatMessage.getMessage().substring(3);
+				OrbChatMessage orbChatMessage = new OrbChatMessage(this, msg);
+				return;
+			}
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -203,7 +209,6 @@ public class OrbWeaverPlugin extends Plugin
 	{
 		if (client.getGameState() != GameState.LOGGED_IN)
 		{
-			return;
 		}
 	}
 
@@ -337,14 +342,14 @@ public class OrbWeaverPlugin extends Plugin
 
 	private void handleIncomingMessages()
 	{
-		byte[] buffer = new byte[512]; // Adjust buffer size as needed
+		byte[] buffer = new byte[512];
 
 		while (!Thread.interrupted())
 		{
 			DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
 			try
 			{
-				socket.receive(packet); // This call blocks until a packet is received
+				socket.receive(packet);
 				incomingPacketHandler.handlePacket(packet);
 			}
 			catch (IOException e)
@@ -352,11 +357,6 @@ public class OrbWeaverPlugin extends Plugin
 				e.printStackTrace();
 			}
 		}
-	}
-
-	public IncomingPacketHandler getIncomingPacketHandler()
-	{
-		return incomingPacketHandler;
 	}
 
 	public void configureServer()

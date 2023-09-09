@@ -8,7 +8,8 @@ public enum PlayerUpdateType
 	MODEL,
 	LOCATION,
 	TEAM,
-	STATUS;
+	STATUS,
+	CHAT_MESSAGE;
 
 	private static final Map<Integer, PlayerUpdateType> indexToEnumMap = new HashMap<>();
 

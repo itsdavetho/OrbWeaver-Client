@@ -1,4 +1,4 @@
-package com.pepperoni.orbweaver.packets.incoming.user;
+package com.pepperoni.orbweaver.packets.incoming.player;
 
 import com.pepperoni.orbweaver.OrbWeaverPlugin;
 import com.pepperoni.orbweaver.packets.IncomingPacket;

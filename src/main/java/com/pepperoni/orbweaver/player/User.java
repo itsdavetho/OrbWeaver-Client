@@ -1,16 +1,14 @@
-package com.pepperoni.orbweaver.players;
+package com.pepperoni.orbweaver.player;
 
 
 import com.pepperoni.orbweaver.OrbWeaverPlugin;
-import com.pepperoni.orbweaver.packets.PacketType;
+import com.pepperoni.orbweaver.packets.outgoing.group.JoinGroup;
 import com.pepperoni.orbweaver.packets.outgoing.group.LeaveGroup;
 import com.pepperoni.orbweaver.packets.outgoing.group.NewGroup;
-import com.pepperoni.orbweaver.packets.outgoing.group.JoinGroup;
-import com.pepperoni.orbweaver.packets.outgoing.user.LocationUpdate;
-import com.pepperoni.orbweaver.packets.outgoing.user.Login;
-import com.pepperoni.orbweaver.packets.outgoing.user.Logout;
+import com.pepperoni.orbweaver.packets.outgoing.player.LocationUpdate;
+import com.pepperoni.orbweaver.packets.outgoing.player.Login;
+import com.pepperoni.orbweaver.packets.outgoing.player.Logout;
 import java.io.IOException;
-import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 import net.runelite.api.Client;
@@ -36,6 +34,9 @@ public class User
 	@Getter
 	@Setter
 	private int world;
+	@Getter
+	@Setter
+	private int userId;
 
 	public User(OrbWeaverPlugin plugin, Client client)
 	{
@@ -45,18 +46,21 @@ public class User
 
 	public void login() throws IOException
 	{
-		Login login = new Login(plugin, username, plugin.getConfig().password(), this.world);
+		new Login(plugin, username, plugin.getConfig().password(), this.world);
+		this.setJWT(null);
+		this.setLoggedIn(false);
+		this.setGroupId(null);
 	}
 
 	public void logout() throws IOException
 	{
 		if (isLoggedIn() && getJWT() != null && plugin.getSocket() != null)
 		{
-			Logout logout = new Logout(plugin);
+			new Logout(plugin);
 
-			this.setLoggedIn(false);
 			this.setJWT(null);
-			this.groupId = "";
+			this.setLoggedIn(false);
+			this.setGroupId(null);
 			plugin.getModelManager().removeModels();
 		}
 	}
@@ -64,20 +68,20 @@ public class User
 	public void setLoggedIn(boolean loggedIn)
 	{
 		this.loggedIn = loggedIn;
-		plugin.getPanel().updateLoginLogoutButton();
+		plugin.getPanel().update();
+
 	}
 
 	public void createGroup(String jwt) throws IOException
 	{
 		new NewGroup(plugin);
-
 	}
 
 	public void setGroupId(String groupId)
 	{
 		this.groupId = groupId;
 		plugin.getPanel().setGroupTextField(groupId);
-		plugin.getPanel().updateLeaveJoinGroupButton();
+		plugin.getPanel().update();
 	}
 
 	public void joinGroup(String groupId) throws IOException
@@ -105,11 +109,7 @@ public class User
 	public void setLocation(WorldPoint loc, int orientation) throws IOException
 	{
 		this.lastLocation = loc;
-
-		if(plugin.getSocket().isConnected())
-		{
-			new LocationUpdate(plugin, loc, orientation);
-		}
+		new LocationUpdate(plugin, loc, orientation);
 	}
 
 }

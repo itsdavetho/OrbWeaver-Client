@@ -18,6 +18,7 @@ public class IncomingPacketHandler
 	{
 		byte[] data = packet.getData();
 		byte opCode = data[0];
+		System.out.println("opcode " + opCode);
 
 		if (opCode < 0 || opCode >= PacketType.values().length)
 		{

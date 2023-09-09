@@ -1,4 +1,4 @@
-package com.pepperoni.orbweaver.packets.incoming.user;
+package com.pepperoni.orbweaver.packets.incoming.player;
 
 import com.pepperoni.orbweaver.OrbWeaverPlugin;
 import com.pepperoni.orbweaver.packets.IncomingPacket;
@@ -20,5 +20,6 @@ public class LoggedOut extends IncomingPacket
 		plugin.setMaxPlayers(0);
 		plugin.getUser().setJWT(null);
 		plugin.getUser().setGroupId(null);
+		plugin.getPanel().update();
 	}
 }

@@ -14,17 +14,28 @@ import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 
 public class Panel extends PluginPanel implements ActionListener {
-    private final OrbWeaverPlugin plugin;
-    private final JLabel currentPartyLabel = new JLabel("Not in a group", SwingConstants.CENTER);
-    private final JLabel messageLabel = new JLabel();
-    private final JLabel copySuccessLabel = new JLabel();
-    private final JTextField textFieldJoinParty = new JTextField();
-    private final JButton leaveJoinGroupButton = new JButton("Join Group");
-    private final JButton loginLogout = new JButton("Login");
-    private final Client client;
+	// TODO: UI strings should probably be defined by a language file but this doesn't matter until the plugin is done
+	private final String joinGroup = "Join Group";
+	private final String leaveGroup = "Leave Group";
+	private final String createGroup = "Create Group";
+	private final String login = "Login";
+	private final String logout = "Logout";
+	private final String notInGroup = "Not in a group";
+	private final String couldNotJoinGroup = "Could not join group. Was that a valid ID?";
+	private final String players = "Players";
+	private final String groupId = "Group ID...";
+	private final OrbWeaverPlugin plugin;
+	private final JLabel currentPartyLabel = new JLabel(notInGroup, SwingConstants.CENTER);
+	private final JLabel messageLabel = new JLabel();
+	private final JLabel copySuccessLabel = new JLabel();
+	private final JTextField groupIdTextField = new JTextField();
+
+	private final JButton leaveJoinGroupButton = new JButton(joinGroup);
+	private final JButton createGroupButton = new JButton(createGroup);
+	private final JButton loginLogout = new JButton(login);
+	private final Client client;
 
     public Panel(OrbWeaverPlugin plugin, Client client) {
         this.plugin = plugin;
@@ -42,8 +53,7 @@ public class Panel extends PluginPanel implements ActionListener {
 
         gridBagConstraints.insets = new Insets(0, 0, 8, 0);
 
-        JButton buttonCreateParty = new JButton("Create Group");
-        buttonCreateParty.addActionListener(e -> {
+        createGroupButton.addActionListener(e -> {
 			try
 			{
 				plugin.getUser().createGroup(plugin.getUser().getJWT());
@@ -54,18 +64,18 @@ public class Panel extends PluginPanel implements ActionListener {
 			}
 		});
 
-        add(buttonCreateParty, gridBagConstraints);
+        add(createGroupButton, gridBagConstraints);
         gridBagConstraints.gridy++;
 
         leaveJoinGroupButton.addActionListener(e -> {
             if (plugin.getUser().getGroupId() == null) {
                 try {
-					if(textFieldJoinParty.getText().trim().length() > 0)
+					if(groupIdTextField.getText().trim().length() > 0)
 					{
-						plugin.getUser().joinGroup(textFieldJoinParty.getText());
+						plugin.getUser().joinGroup(groupIdTextField.getText());
 					}
                 } catch (IOException ex) {
-                    plugin.sendPrivateMessage("Could not join group. Was that a valid ID?");
+                    plugin.sendPrivateMessage(couldNotJoinGroup);
                 }
             } else {
 				try
@@ -79,7 +89,7 @@ public class Panel extends PluginPanel implements ActionListener {
 			}
         });
 
-        add(textFieldJoinParty, gridBagConstraints);
+        add(groupIdTextField, gridBagConstraints);
         gridBagConstraints.gridy++;
 
         add(leaveJoinGroupButton, gridBagConstraints);
@@ -101,10 +111,10 @@ public class Panel extends PluginPanel implements ActionListener {
 
         partyPanel.setBorder(new CompoundBorder(border, margin));
 
-        JLabel copyLabel = new JLabel("Players", SwingConstants.CENTER);
+        JLabel copyLabel = new JLabel(players, SwingConstants.CENTER);
         copyLabel.setFont(new Font(FontManager.getRunescapeFont().getName(), Font.PLAIN, 25));
         copyLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        JLabel currentGroup = new JLabel("Not in a group", SwingConstants.CENTER);
+        JLabel currentGroup = new JLabel(notInGroup, SwingConstants.CENTER);
         currentGroup.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         partyPanel.add(copyLabel);
@@ -125,8 +135,8 @@ public class Panel extends PluginPanel implements ActionListener {
             }
         });
 
-        addPlaceholder(textFieldJoinParty, "Group ID...");
-        add(textFieldJoinParty, gridBagConstraints);
+        addPlaceholder(groupIdTextField, groupId);
+        add(groupIdTextField, gridBagConstraints);
         gridBagConstraints.gridy++;
 
         add(leaveJoinGroupButton, gridBagConstraints);
@@ -163,28 +173,32 @@ public class Panel extends PluginPanel implements ActionListener {
         if (groupId == null) {
             groupId = "";
         }
-        textFieldJoinParty.setText(groupId);
+        groupIdTextField.setText(groupId);
     }
 
-    public void updateLoginLogoutButton() {
-        if (plugin.getUser().isLoggedIn()) {
-			this.loginLogout.setText("Logout");
-			this.textFieldJoinParty.setVisible(true);
-			this.leaveJoinGroupButton.setVisible(true);
-		} else {
-			this.loginLogout.setText("Login");
-			this.textFieldJoinParty.setVisible(false);
-			this.leaveJoinGroupButton.setVisible(false);
-			setGroupTextField(null);
+	// update the panel and overlay on state change (logged in/logged out, joined/left group, etc)
+    public void update() {
+		boolean isLoggedIn = plugin.getUser().isLoggedIn();
+		boolean hasGroup = plugin.getUser().getGroupId() != null;
+
+		this.loginLogout.setText(isLoggedIn ? logout : login);
+		this.leaveJoinGroupButton.setVisible(isLoggedIn);
+		this.groupIdTextField.setVisible(isLoggedIn);
+		this.createGroupButton.setVisible(isLoggedIn && !hasGroup);
+
+		if(!isLoggedIn) {
+			this.groupIdTextField.setText("");
+			addPlaceholder(groupIdTextField, groupId);
+			this.plugin.getOverlay().setServerTitle("OrbWeaver");
+			this.plugin.setPlayersOnline(0);
+			this.plugin.setMaxPlayers(0);
 		}
-    }
 
-    public void updateLeaveJoinGroupButton() {
-		if (plugin.getUser().getGroupId() != null) {
-            this.leaveJoinGroupButton.setText("Leave Group");
-        } else {
-            this.leaveJoinGroupButton.setText("Join Group");
-        }
+		this.leaveJoinGroupButton.setText(hasGroup ? leaveGroup : joinGroup);
+
+		if (!hasGroup) {
+			addPlaceholder(groupIdTextField, groupId);
+		}
     }
 
     @Override

@@ -1,9 +1,9 @@
-package com.pepperoni.orbweaver.packets.incoming.user;
+package com.pepperoni.orbweaver.packets.incoming.player;
 
 import com.pepperoni.orbweaver.OrbWeaverPlugin;
 import com.pepperoni.orbweaver.packets.IncomingPacket;
 import com.pepperoni.orbweaver.packets.PlayerUpdateType;
-import com.pepperoni.orbweaver.players.OrbWeaverPlayer;
+import com.pepperoni.orbweaver.player.OrbWeaverPlayer;
 import java.io.DataInputStream;
 import java.io.IOException;
 

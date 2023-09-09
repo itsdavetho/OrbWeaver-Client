@@ -2,7 +2,7 @@ package com.pepperoni.orbweaver.packets.incoming.group;
 
 import com.pepperoni.orbweaver.OrbWeaverPlugin;
 import com.pepperoni.orbweaver.packets.IncomingPacket;
-import com.pepperoni.orbweaver.players.OrbWeaverPlayer;
+import com.pepperoni.orbweaver.player.OrbWeaverPlayer;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -28,6 +28,9 @@ public class PlayerList extends IncomingPacket
 			byte[] usernameBytes = new byte[usernameLength];
 			data.readFully(usernameBytes);
 			String username = new String(usernameBytes, StandardCharsets.UTF_8);
+			if(username == plugin.getUser().getUsername()) {
+
+			}
 			OrbWeaverPlayer orbWeaverPlayer = new OrbWeaverPlayer(username);
 			players.put((short) userId, orbWeaverPlayer);
 		}

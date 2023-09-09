@@ -12,12 +12,12 @@ import lombok.Getter;
 public abstract class OutgoingPacket
 {
 	@Inject
-	private OrbWeaverPlugin plugin;
-	private ByteArrayOutputStream outputStream;
+	private final OrbWeaverPlugin plugin;
+	private final ByteArrayOutputStream outputStream;
 	@Getter
-	private DataOutputStream dataOutputStream;
+	private final DataOutputStream dataOutputStream;
 	@Getter
-	private PacketType packetType;
+	private final PacketType packetType;
 
 	public OutgoingPacket(OrbWeaverPlugin plugin, PacketType packetType) throws IOException
 	{

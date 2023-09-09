@@ -1,4 +1,4 @@
-package com.pepperoni.orbweaver.players;
+package com.pepperoni.orbweaver.player;
 
 import net.runelite.api.coords.WorldPoint;
 
