@@ -1,15 +1,14 @@
-package com.pepperoni.orbweaver.packets.type;
+package com.pepperoni.orbweaver.packets.incoming.user;
 
 import com.pepperoni.orbweaver.OrbWeaverPlugin;
-import com.pepperoni.orbweaver.packets.Packet;
-import com.pepperoni.orbweaver.packets.PacketHandler;
-import com.pepperoni.orbweaver.packets.PacketType;
+import com.pepperoni.orbweaver.packets.IncomingPacket;
+import com.pepperoni.orbweaver.packets.IncomingPacketHandler;
+import com.pepperoni.orbweaver.packets.outgoing.RequestServerInfo;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 
-public class UserGetJWT extends Packet
+public class UserGetJWT extends IncomingPacket
 {
 	public UserGetJWT(byte[] data) throws IOException
 	{
@@ -32,9 +31,9 @@ public class UserGetJWT extends Packet
 
 		System.out.println("logged in, requesting server information...");
 
-		// once the JWT is received the user is confirmed to be logged in, we could request other information from the server here:
-		PacketHandler packetHandler = plugin.getPacketHandler();
-		List<byte[]> packet = plugin.getPacketHandler().createPacket(PacketType.SERVER_INFO, plugin.getUser().getJWT());
-		packetHandler.sendPacket(packet);
+		// once the JWT is received the user is confirmed to be logged in, we could request other information from the server, or send updates for example.
+		IncomingPacketHandler incomingPacketHandler = plugin.getIncomingPacketHandler();
+		new RequestServerInfo(plugin);
+
 	}
 }

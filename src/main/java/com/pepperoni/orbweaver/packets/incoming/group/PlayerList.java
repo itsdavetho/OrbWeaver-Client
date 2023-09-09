@@ -1,14 +1,14 @@
-package com.pepperoni.orbweaver.packets.type;
+package com.pepperoni.orbweaver.packets.incoming.group;
 
 import com.pepperoni.orbweaver.OrbWeaverPlugin;
-import com.pepperoni.orbweaver.packets.Packet;
+import com.pepperoni.orbweaver.packets.IncomingPacket;
 import com.pepperoni.orbweaver.players.OrbWeaverPlayer;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 
-public class PlayerList extends Packet
+public class PlayerList extends IncomingPacket
 {
 	public PlayerList(byte[] data) throws IOException
 	{

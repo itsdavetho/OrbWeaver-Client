@@ -1,11 +1,11 @@
-package com.pepperoni.orbweaver.packets.type;
+package com.pepperoni.orbweaver.packets.incoming.server;
 
 import com.pepperoni.orbweaver.OrbWeaverPlugin;
-import com.pepperoni.orbweaver.packets.Packet;
+import com.pepperoni.orbweaver.packets.IncomingPacket;
 import java.io.DataInputStream;
 import java.io.IOException;
 
-public class ErrorMessage extends Packet
+public class ErrorMessage extends IncomingPacket
 {
 
 	public ErrorMessage(byte[] data) throws IOException

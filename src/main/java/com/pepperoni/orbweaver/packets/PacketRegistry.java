@@ -1,20 +1,20 @@
 package com.pepperoni.orbweaver.packets;
 
-import com.pepperoni.orbweaver.packets.type.ErrorMessage;
-import com.pepperoni.orbweaver.packets.type.GroupInfo;
-import com.pepperoni.orbweaver.packets.type.GroupLeave;
-import com.pepperoni.orbweaver.packets.type.LoggedOut;
-import com.pepperoni.orbweaver.packets.type.PlayerList;
-import com.pepperoni.orbweaver.packets.type.PlayerUpdate;
-import com.pepperoni.orbweaver.packets.type.ServerInfo;
-import com.pepperoni.orbweaver.packets.type.UserGetJWT;
-import com.pepperoni.orbweaver.packets.type.WorldObject;
+import com.pepperoni.orbweaver.packets.incoming.server.ErrorMessage;
+import com.pepperoni.orbweaver.packets.incoming.group.GroupInfo;
+import com.pepperoni.orbweaver.packets.incoming.group.GroupLeave;
+import com.pepperoni.orbweaver.packets.incoming.user.LoggedOut;
+import com.pepperoni.orbweaver.packets.incoming.group.PlayerList;
+import com.pepperoni.orbweaver.packets.incoming.user.PlayerUpdate;
+import com.pepperoni.orbweaver.packets.incoming.server.ServerInfo;
+import com.pepperoni.orbweaver.packets.incoming.user.UserGetJWT;
+import com.pepperoni.orbweaver.packets.incoming.world.Model;
 import java.util.HashMap;
 import java.util.Map;
 
 public class PacketRegistry
 {
-	private static final Map<PacketType, Class<? extends Packet>> packetRegistry = new HashMap<>();
+	private static final Map<PacketType, Class<? extends IncomingPacket>> packetRegistry = new HashMap<>();
 
 	static
 	{
@@ -26,13 +26,13 @@ public class PacketRegistry
 		packetRegistry.put(PacketType.GROUP_INFO, GroupInfo.class);
 		// packetRegistry.put(PacketType.MASTER_SERVER_LIST, MasterServerList.class);
 		packetRegistry.put(PacketType.SERVER_INFO, ServerInfo.class);
-		packetRegistry.put(PacketType.WORLD_MODEL, WorldObject.class);
+		packetRegistry.put(PacketType.WORLD_MODEL, Model.class);
 		packetRegistry.put(PacketType.LOGGED_OUT, LoggedOut.class);
 
 		// Add more mappings for other PacketType enums as needed
 	}
 
-	public static Class<? extends Packet> getHandler(PacketType packetType)
+	public static Class<? extends IncomingPacket> getHandler(PacketType packetType)
 	{
 		return packetRegistry.get(packetType);
 	}

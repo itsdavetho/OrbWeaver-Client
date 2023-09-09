@@ -1,12 +1,12 @@
-package com.pepperoni.orbweaver.packets.type;
+package com.pepperoni.orbweaver.packets.incoming.server;
 
 import com.pepperoni.orbweaver.OrbWeaverPlugin;
-import com.pepperoni.orbweaver.packets.Packet;
+import com.pepperoni.orbweaver.packets.IncomingPacket;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-public class ServerInfo extends Packet
+public class ServerInfo extends IncomingPacket
 {
 
 	public ServerInfo(byte[] data) throws IOException

@@ -5,14 +5,14 @@ import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 
-public abstract class Packet
+public abstract class IncomingPacket
 {
 	private byte opCode = -1;
 	private byte[] data = null;
 	private ByteArrayInputStream inputStream = null;
 	private DataInputStream dataInputStream = null;
 
-	public Packet(byte[] data) throws IOException
+	public IncomingPacket(byte[] data) throws IOException
 	{
 		this.setData(data);
 	}

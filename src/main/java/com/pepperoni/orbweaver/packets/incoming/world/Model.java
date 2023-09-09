@@ -1,14 +1,14 @@
-package com.pepperoni.orbweaver.packets.type;
+package com.pepperoni.orbweaver.packets.incoming.world;
 
 import com.pepperoni.orbweaver.OrbWeaverPlugin;
-import com.pepperoni.orbweaver.packets.Packet;
+import com.pepperoni.orbweaver.packets.IncomingPacket;
 import java.io.DataInputStream;
 import java.io.IOException;
 import net.runelite.api.coords.WorldPoint;
 
-public class WorldObject extends Packet
+public class Model extends IncomingPacket
 {
-	public WorldObject(byte[] data) throws IOException
+	public Model(byte[] data) throws IOException
 	{
 		super(data);
 	}

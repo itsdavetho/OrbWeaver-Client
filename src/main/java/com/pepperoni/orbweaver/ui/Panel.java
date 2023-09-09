@@ -44,8 +44,15 @@ public class Panel extends PluginPanel implements ActionListener {
 
         JButton buttonCreateParty = new JButton("Create Group");
         buttonCreateParty.addActionListener(e -> {
-            plugin.getUser().createGroup(plugin.getUser().getJWT());
-        });
+			try
+			{
+				plugin.getUser().createGroup(plugin.getUser().getJWT());
+			}
+			catch (IOException ex)
+			{
+				ex.printStackTrace();
+			}
+		});
 
         add(buttonCreateParty, gridBagConstraints);
         gridBagConstraints.gridy++;
@@ -57,12 +64,19 @@ public class Panel extends PluginPanel implements ActionListener {
 					{
 						plugin.getUser().joinGroup(textFieldJoinParty.getText());
 					}
-                } catch (UnsupportedEncodingException ex) {
+                } catch (IOException ex) {
                     plugin.sendPrivateMessage("Could not join group. Was that a valid ID?");
                 }
             } else {
-                plugin.getUser().leaveGroup();
-            }
+				try
+				{
+					plugin.getUser().leaveGroup();
+				}
+				catch (IOException ex)
+				{
+					ex.printStackTrace();
+				}
+			}
         });
 
         add(textFieldJoinParty, gridBagConstraints);

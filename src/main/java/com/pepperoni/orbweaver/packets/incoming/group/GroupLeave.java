@@ -1,10 +1,10 @@
-package com.pepperoni.orbweaver.packets.type;
+package com.pepperoni.orbweaver.packets.incoming.group;
 
 import com.pepperoni.orbweaver.OrbWeaverPlugin;
-import com.pepperoni.orbweaver.packets.Packet;
+import com.pepperoni.orbweaver.packets.IncomingPacket;
 import java.io.IOException;
 
-public class GroupLeave extends Packet
+public class GroupLeave extends IncomingPacket
 {
 	public GroupLeave(byte[] data) throws IOException
 	{

@@ -3,12 +3,13 @@ package com.pepperoni.orbweaver.players;
 
 import com.pepperoni.orbweaver.OrbWeaverPlugin;
 import com.pepperoni.orbweaver.packets.PacketType;
-import com.pepperoni.orbweaver.packets.PlayerUpdateType;
+import com.pepperoni.orbweaver.packets.outgoing.group.LeaveGroup;
+import com.pepperoni.orbweaver.packets.outgoing.group.NewGroup;
+import com.pepperoni.orbweaver.packets.outgoing.group.JoinGroup;
+import com.pepperoni.orbweaver.packets.outgoing.user.LocationUpdate;
+import com.pepperoni.orbweaver.packets.outgoing.user.Login;
+import com.pepperoni.orbweaver.packets.outgoing.user.Logout;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
@@ -44,41 +45,15 @@ public class User
 
 	public void login() throws IOException
 	{
-		if (plugin.getSocket() == null || getUsername() == null)
-		{
-			plugin.configureServer();
-		}
-
-		if (getUsername() != null)
-		{
-			List<byte[]> packet = plugin.getPacketHandler().createPacket(PacketType.USER_LOGIN, "unauthorized");
-			byte[] username = getUsername().getBytes(StandardCharsets.UTF_8);
-			byte[] password = plugin.getConfig().password().getBytes(StandardCharsets.UTF_8);
-			byte[] worldBuffer = new byte[2];
-			ByteBuffer.wrap(worldBuffer).putShort((short) this.world);
-
-			List<byte[]> bufferList = new ArrayList<>();
-			bufferList.add(new byte[]{(byte) username.length, (byte) password.length});
-			bufferList.add(username);
-			bufferList.add(password);
-			bufferList.add(worldBuffer);
-
-			packet.addAll(bufferList);
-
-			plugin.getPacketHandler().sendPacket(packet);
-		}
-		else
-		{
-			System.out.println("Failed to login: local player not found");
-		}
+		Login login = new Login(plugin, username, plugin.getConfig().password(), this.world);
 	}
 
-	public void logout()
+	public void logout() throws IOException
 	{
 		if (isLoggedIn() && getJWT() != null && plugin.getSocket() != null)
 		{
-			List<byte[]> packet = plugin.getPacketHandler().createPacket(PacketType.USER_LOGOUT, getJWT());
-			plugin.getPacketHandler().sendPacket(packet);
+			Logout logout = new Logout(plugin);
+
 			this.setLoggedIn(false);
 			this.setJWT(null);
 			this.groupId = "";
@@ -92,10 +67,10 @@ public class User
 		plugin.getPanel().updateLoginLogoutButton();
 	}
 
-	public void createGroup(String jwt)
+	public void createGroup(String jwt) throws IOException
 	{
-		List<byte[]> packet = plugin.getPacketHandler().createPacket(PacketType.GROUP_NEW, jwt);
-		plugin.getPacketHandler().sendPacket(packet);
+		new NewGroup(plugin);
+
 	}
 
 	public void setGroupId(String groupId)
@@ -105,17 +80,11 @@ public class User
 		plugin.getPanel().updateLeaveJoinGroupButton();
 	}
 
-	public void joinGroup(String groupId) throws UnsupportedEncodingException
+	public void joinGroup(String groupId) throws IOException
 	{
 		if (isLoggedIn() && getJWT() != null && getGroupId() == null)
 		{
-			List<byte[]> packet = plugin.getPacketHandler().createPacket(PacketType.GROUP_JOIN, getJWT());
-			byte[] groupBuffer = groupId.getBytes(StandardCharsets.UTF_8);
-			List<byte[]> bufferList = new ArrayList<>();
-			bufferList.add(new byte[]{(byte) groupBuffer.length});
-			bufferList.add(groupBuffer);
-			packet.addAll(bufferList);
-			plugin.getPacketHandler().sendPacket(packet);
+			new JoinGroup(plugin, groupId);
 		}
 		else
 		{
@@ -123,18 +92,9 @@ public class User
 		}
 	}
 
-	public void leaveGroup()
+	public void leaveGroup() throws IOException
 	{
-		System.out.println(isLoggedIn() + " " + getJWT());
-		if (isLoggedIn() && getJWT() != null)
-		{
-			List<byte[]> packet = plugin.getPacketHandler().createPacket(PacketType.GROUP_LEAVE, getJWT());
-			plugin.getPacketHandler().sendPacket(packet);
-		}
-		else
-		{
-			plugin.sendPrivateMessage("There was an error while trying to leave the group.");
-		}
+		new LeaveGroup(plugin);
 	}
 
 	public String getGameStatus()
@@ -142,27 +102,14 @@ public class User
 		return "inactive";
 	}
 
-	public void setLocation(WorldPoint loc, int orientation)
+	public void setLocation(WorldPoint loc, int orientation) throws IOException
 	{
 		this.lastLocation = loc;
 
-		List<byte[]> packet = plugin.getPacketHandler().createPacket(PacketType.PLAYER_UPDATE, getJWT());
-
-		ByteBuffer buffer = ByteBuffer.allocate(1 + 2 + 2 + 1 + 2);
-		//1 byte for update code,
-		// 2 bytes for x, 2 bytes for y,
-		// 1 byte for z, and 2 bytes for orientation
-
-		buffer.put((byte) PlayerUpdateType.LOCATION.getIndex());
-		buffer.putShort((short) loc.getX());
-		buffer.putShort((short) loc.getY());
-		buffer.put((byte) loc.getPlane());
-		buffer.putShort((short) orientation);
-		byte[] locationData = buffer.array();
-
-		packet.add(locationData);
-
-		plugin.getPacketHandler().sendPacket(packet);
+		if(plugin.getSocket().isConnected())
+		{
+			new LocationUpdate(plugin, loc, orientation);
+		}
 	}
 
 }

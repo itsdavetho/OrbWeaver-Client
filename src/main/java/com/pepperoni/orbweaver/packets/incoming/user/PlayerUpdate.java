@@ -1,13 +1,13 @@
-package com.pepperoni.orbweaver.packets.type;
+package com.pepperoni.orbweaver.packets.incoming.user;
 
 import com.pepperoni.orbweaver.OrbWeaverPlugin;
-import com.pepperoni.orbweaver.packets.Packet;
+import com.pepperoni.orbweaver.packets.IncomingPacket;
 import com.pepperoni.orbweaver.packets.PlayerUpdateType;
 import com.pepperoni.orbweaver.players.OrbWeaverPlayer;
 import java.io.DataInputStream;
 import java.io.IOException;
 
-public class PlayerUpdate extends Packet
+public class PlayerUpdate extends IncomingPacket
 {
 
 

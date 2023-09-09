@@ -1,10 +1,10 @@
-package com.pepperoni.orbweaver.packets.type;
+package com.pepperoni.orbweaver.packets.incoming.user;
 
 import com.pepperoni.orbweaver.OrbWeaverPlugin;
-import com.pepperoni.orbweaver.packets.Packet;
+import com.pepperoni.orbweaver.packets.IncomingPacket;
 import java.io.IOException;
 
-public class LoggedOut extends Packet
+public class LoggedOut extends IncomingPacket
 {
 	public LoggedOut(byte[] data) throws IOException
 	{

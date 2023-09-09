@@ -2,7 +2,7 @@ package com.pepperoni.orbweaver;
 
 import com.google.inject.Inject;
 import com.google.inject.Provides;
-import com.pepperoni.orbweaver.packets.PacketHandler;
+import com.pepperoni.orbweaver.packets.IncomingPacketHandler;
 import com.pepperoni.orbweaver.players.OrbWeaverPlayer;
 import com.pepperoni.orbweaver.players.User;
 import com.pepperoni.orbweaver.ui.Overlay;
@@ -21,7 +21,6 @@ import javax.swing.SwingUtilities;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.Animation;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.api.DecorativeObject;
@@ -31,12 +30,9 @@ import net.runelite.api.GroundObject;
 import net.runelite.api.Model;
 import net.runelite.api.Player;
 import net.runelite.api.Renderable;
-import net.runelite.api.RuneLiteObject;
 import net.runelite.api.Tile;
 import net.runelite.api.TileItem;
 import net.runelite.api.WallObject;
-import net.runelite.api.coords.LocalPoint;
-import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.ClientTick;
 import net.runelite.api.events.GameStateChanged;
@@ -102,7 +98,7 @@ public class OrbWeaverPlugin extends Plugin
 	@Getter
 	@Setter
 	private int serverPort;
-	private final PacketHandler packetHandler;
+	private final IncomingPacketHandler incomingPacketHandler;
 
 	@Getter
 	@Setter
@@ -128,7 +124,7 @@ public class OrbWeaverPlugin extends Plugin
 	public OrbWeaverPlugin()
 	{
 		user = new User(this, client);
-		packetHandler = new PacketHandler(this);
+		incomingPacketHandler = new IncomingPacketHandler(this);
 	}
 
 	@Override
@@ -145,11 +141,25 @@ public class OrbWeaverPlugin extends Plugin
 	protected void shutDown()
 	{
 		commandManager.unregisterCommand("!panel");
-		user.logout();
+		try
+		{
+			user.logout();
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
 		overlayManager.remove(overlay);
 		panel = null;
 		clientToolbar.removeNavigation(navButton);
-		getUser().setLocation(null, -1);
+		try
+		{
+			getUser().setLocation(null, client.getLocalPlayer().getOrientation());
+		}
+		catch (IOException e)
+		{
+			throw new RuntimeException(e);
+		}
 		getUser().setUsername(null);
 		user.setJWT(null);
 		user.setGroupId(null);
@@ -169,7 +179,14 @@ public class OrbWeaverPlugin extends Plugin
 		{
 			if (getUser().getLastLocation() == null || !getUser().getLastLocation().equals(client.getLocalPlayer().getWorldLocation()))
 			{
-				getUser().setLocation(client.getLocalPlayer().getWorldLocation(), client.getLocalPlayer().getOrientation());
+				try
+				{
+					getUser().setLocation(client.getLocalPlayer().getWorldLocation(), client.getLocalPlayer().getOrientation());
+				}
+				catch (IOException e)
+				{
+					e.printStackTrace();
+				}
 			}
 		}
 
@@ -328,7 +345,7 @@ public class OrbWeaverPlugin extends Plugin
 			try
 			{
 				socket.receive(packet); // This call blocks until a packet is received
-				packetHandler.handlePacket(packet);
+				incomingPacketHandler.handlePacket(packet);
 			}
 			catch (IOException e)
 			{
@@ -337,9 +354,9 @@ public class OrbWeaverPlugin extends Plugin
 		}
 	}
 
-	public PacketHandler getPacketHandler()
+	public IncomingPacketHandler getIncomingPacketHandler()
 	{
-		return packetHandler;
+		return incomingPacketHandler;
 	}
 
 	public void configureServer()
