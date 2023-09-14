@@ -4,31 +4,29 @@ import com.pepperoni.orbweaver.OrbWeaverPlugin;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
+import lombok.Getter;
 
 public abstract class IncomingPacket
 {
+	@Getter
 	private byte opCode = -1;
-	private byte[] data = null;
+	private byte[] bytes = null;
 	private ByteArrayInputStream inputStream = null;
-	private DataInputStream dataInputStream = null;
+	@Getter
+	private DataInputStream data = null;
 
-	public IncomingPacket(byte[] data) throws IOException
+	public IncomingPacket(byte[] bytes) throws IOException
 	{
-		this.setData(data);
+		this.setBytes(bytes);
 	}
 
-	private void setData(byte[] data) throws IOException
+	private void setBytes(byte[] bytes) throws IOException
 	{
-		this.data = data;
-		this.inputStream = new ByteArrayInputStream(data);
-		this.dataInputStream = new DataInputStream(inputStream);
-		byte opCode = (byte) dataInputStream.readUnsignedByte();
+		this.bytes = bytes;
+		this.inputStream = new ByteArrayInputStream(bytes);
+		this.data = new DataInputStream(inputStream);
+		byte opCode = (byte) data.readUnsignedByte();
 		this.setOpCode(opCode);
-	}
-
-	public DataInputStream getData()
-	{
-		return this.dataInputStream;
 	}
 
 	// this.dataInputStream is processed here
@@ -37,7 +35,7 @@ public abstract class IncomingPacket
 	public void close() throws IOException
 	{
 		this.inputStream.close();
-		this.dataInputStream.close();
+		this.data.close();
 	}
 
 	public boolean setOpCode(byte opCode)
@@ -48,10 +46,5 @@ public abstract class IncomingPacket
 		}
 		this.opCode = opCode;
 		return true;
-	}
-
-	public byte getOpCode()
-	{
-		return this.opCode;
 	}
 }

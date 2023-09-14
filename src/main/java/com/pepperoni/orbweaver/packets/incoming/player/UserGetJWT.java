@@ -3,7 +3,7 @@ package com.pepperoni.orbweaver.packets.incoming.player;
 import com.pepperoni.orbweaver.OrbWeaverPlugin;
 import com.pepperoni.orbweaver.packets.IncomingPacket;
 import com.pepperoni.orbweaver.packets.IncomingPacketHandler;
-import com.pepperoni.orbweaver.packets.outgoing.RequestServerInfo;
+import com.pepperoni.orbweaver.packets.outgoing.server.Info;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -33,7 +33,7 @@ public class UserGetJWT extends IncomingPacket
 
 		// once the JWT is received the user is confirmed to be logged in, we could request other information from the server, or send updates for example.
 		IncomingPacketHandler incomingPacketHandler = plugin.getIncomingPacketHandler();
-		new RequestServerInfo(plugin);
+		new Info(plugin);
 
 	}
 }

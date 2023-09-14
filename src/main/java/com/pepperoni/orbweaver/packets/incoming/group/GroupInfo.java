@@ -5,11 +5,14 @@ import com.pepperoni.orbweaver.packets.IncomingPacket;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import lombok.Getter;
 
 public class GroupInfo extends IncomingPacket
 {
+	@Getter
 	private String groupId;
-	private String creatorUsername;
+	@Getter
+	private String creator;
 
 	public GroupInfo(byte[] data) throws IOException
 	{
@@ -26,7 +29,7 @@ public class GroupInfo extends IncomingPacket
 
 		byte[] creatorUsernameBuffer = new byte[creatorUsernameLength];
 		data.readFully(creatorUsernameBuffer);
-		this.creatorUsername = new String(creatorUsernameBuffer, StandardCharsets.UTF_8);
+		this.creator = new String(creatorUsernameBuffer, StandardCharsets.UTF_8);
 
 		byte[] groupIdBuffer = new byte[groupIdLength];
 		data.readFully(groupIdBuffer);
@@ -34,13 +37,5 @@ public class GroupInfo extends IncomingPacket
 
 		plugin.getUser().setGroupId(groupId);
 		this.close();
-	}
-
-	public String getCreator() {
-		return this.creatorUsername;
-	}
-
-	public String getGroupId() {
-		return this.groupId;
 	}
 }

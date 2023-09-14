@@ -79,6 +79,7 @@ public class User
 
 	public void setGroupId(String groupId)
 	{
+		groupId = groupId == null ? "" : groupId;
 		this.groupId = groupId;
 		plugin.getPanel().setGroupTextField(groupId);
 		plugin.getPanel().update();

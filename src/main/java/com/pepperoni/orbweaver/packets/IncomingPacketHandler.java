@@ -4,7 +4,6 @@ import com.pepperoni.orbweaver.OrbWeaverPlugin;
 import java.io.IOException;
 import java.net.DatagramPacket;
 
-
 public class IncomingPacketHandler
 {
 	private final OrbWeaverPlugin plugin;

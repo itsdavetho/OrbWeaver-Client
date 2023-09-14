@@ -6,7 +6,7 @@ import com.pepperoni.orbweaver.packets.incoming.group.GroupLeave;
 import com.pepperoni.orbweaver.packets.incoming.player.LoggedOut;
 import com.pepperoni.orbweaver.packets.incoming.group.PlayerList;
 import com.pepperoni.orbweaver.packets.incoming.player.PlayerUpdate;
-import com.pepperoni.orbweaver.packets.incoming.server.ServerInfo;
+import com.pepperoni.orbweaver.packets.incoming.server.Info;
 import com.pepperoni.orbweaver.packets.incoming.player.UserGetJWT;
 import com.pepperoni.orbweaver.packets.incoming.world.Model;
 import java.util.HashMap;
@@ -25,7 +25,7 @@ public class PacketRegistry
 		packetRegistry.put(PacketType.GROUP_LEAVE, GroupLeave.class);
 		packetRegistry.put(PacketType.GROUP_INFO, GroupInfo.class);
 		// packetRegistry.put(PacketType.MASTER_SERVER_LIST, MasterServerList.class);
-		packetRegistry.put(PacketType.SERVER_INFO, ServerInfo.class);
+		packetRegistry.put(PacketType.SERVER_INFO, Info.class);
 		packetRegistry.put(PacketType.WORLD_MODEL, Model.class);
 		packetRegistry.put(PacketType.LOGGED_OUT, LoggedOut.class);
 

@@ -6,6 +6,8 @@ import com.pepperoni.orbweaver.packets.PlayerUpdateType;
 import com.pepperoni.orbweaver.player.OrbWeaverPlayer;
 import java.io.DataInputStream;
 import java.io.IOException;
+import net.runelite.api.World;
+import net.runelite.api.coords.WorldPoint;
 
 public class PlayerUpdate extends IncomingPacket
 {
@@ -42,7 +44,9 @@ public class PlayerUpdate extends IncomingPacket
 			int z = data.readUnsignedByte();
 			short orientation = (short) data.readUnsignedShort();
 
-			orbWeaverPlayer.setLocation(x, y, z);
+			orbWeaverPlayer.setLocation(
+				new WorldPoint(x, y, z)
+			);
 			orbWeaverPlayer.setOrientation(orientation);
 		}
 	}

@@ -6,10 +6,10 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-public class ServerInfo extends IncomingPacket
+public class Info extends IncomingPacket
 {
 
-	public ServerInfo(byte[] data) throws IOException
+	public Info(byte[] data) throws IOException
 	{
 		super(data);
 	}
